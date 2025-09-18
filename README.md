@@ -119,8 +119,7 @@ INSERT INTO users(tenDangNhap, matKhau) VALUES ('admin', 'admin1');
 - Kiểm tra thông tin kết nối JDBC (URL, TEN_NGUOI_DUNG, MAT_KHAU) để đảm bảo chính xác.
 - Server phải được chạy trước khi Client kết nối.
 ## 📞 5. Liên hệ cá nhân  
-- 👤 Họ và tên: **ĐẶNG THANH BÌNH**  
-- 🎓 Lớp: **CNTT 16-04**
-- 🎓 Khoa: **Công nghệ Thông tin – Đại học Đại Nam**    
-- 📧 Email: *dnagbinh12@gmail.com*  
-- 📱 Số điện thoại: *0822968881*  
+- 👤 **Họ và tên**: *Đặng Thanh Bình*  
+- 🎓 **Lớp**: *CNTT 16-04*
+- 📧 **Email**: *dnagbinh12@gmail.com*  
+- 📱 **Số điện thoại**: *0822968881*  
