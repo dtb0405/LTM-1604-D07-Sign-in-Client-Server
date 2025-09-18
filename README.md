@@ -53,6 +53,19 @@ Trong đó:
 
 ---
 ## 🛠️ 4. Các bước cài đặt
+### 4.1. Cài đặt môi trường
+- Cài đặt **JDK 8+**: [Download Java](https://www.oracle.com/java/technologies/javase-downloads.html)  
+- Cài đặt **MySQL Server**: [Download MySQL](https://dev.mysql.com/downloads/)  
+- Cài đặt **Git** (nếu chưa có): [Download Git](https://git-scm.com/downloads)  
+- IDE khuyến nghị: **IntelliJ IDEA** hoặc **Eclipse**  
+
+---
+
+### 4.2. Clone source code
+Mở terminal/cmd và chạy lệnh:
+```bash
+git clone https://github.com/dtb0405/LTM-1604-D07-Sign-in-Client-Server.git
+cd LTM-1604-D07-Sign-in-Client-Server
 
 ## 📞 5. Liên hệ cá nhân  
 - 👤 Họ và tên: **ĐẶNG THANH BÌNH**  
