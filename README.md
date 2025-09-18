@@ -58,15 +58,66 @@ Trong đó:
 - Cài đặt **MySQL Server**: [Download MySQL](https://dev.mysql.com/downloads/)  
 - Cài đặt **Git** (nếu chưa có): [Download Git](https://git-scm.com/downloads)  
 - IDE khuyến nghị: **IntelliJ IDEA** hoặc **Eclipse**  
-
----
-
 ### 4.2. Clone source code
-Mở terminal/cmd và chạy lệnh:
+Mở terminal/cmd và chạy lệnh:  
 ```bash
 git clone https://github.com/dtb0405/LTM-1604-D07-Sign-in-Client-Server.git
 cd LTM-1604-D07-Sign-in-Client-Server
+```
+### 4.3. Khởi tạo cơ sở dữ liệu MySQL
+Mở **MySQL Workbench** và chạy lệnh:
+```sql
+CREATE DATABASE LoginDB;
+USE LoginDB;
 
+CREATE TABLE NguoiDung (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tenDangNhap VARCHAR(50) UNIQUE NOT NULL,
+    matKhau VARCHAR(100) NOT NULL
+);
+```
+Thêm một số tài khoản test: 
+```sql
+INSERT INTO users(tenDangNhap, matKhau) VALUES ('admin', 'admin1');
+```
+### 4.4. Cấu Hình Kết Nối JDBC
+1. Mở file `DBConnection.java` trong thư mục `Server`.
+2. Cập nhật thông tin kết nối cơ sở dữ liệu MySQL như sau:
+   ```java
+   private static final String URL = "jdbc:mysql://localhost:3306/LoginDB?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
+   private static final String TEN_NGUOI_DUNG = "root";  // thay bằng user MySQL
+   private static final String MAT_KHAU = "your_password";   
+   ```
+   - **URL**: Địa chỉ kết nối đến cơ sở dữ liệu MySQL (thay `LoginDB` nếu tên database khác).
+   - **TEN_NGUOI_DUNG**: Tên người dùng MySQL (mặc định là `root`).
+   - **MAT_KHAU**: Mật khẩu MySQL (thay `your_password` bằng mật khẩu thực tế của bạn).
+
+### 4.5. Chạy Chương Trình
+#### Chạy Server
+1. Mở lớp `MayChu.java` trong thư mục `Server`.
+2. Chạy chương trình (`Run`).
+3. Server sẽ khởi động và lắng nghe kết nối trên **port 2712**.
+
+#### Chạy Client
+1. Mở lớp `GiaoDienNguoiDung.java` trong thư mục `Client`.
+2. Chạy chương trình (`Run`).
+3. Giao diện người dùng sẽ hiển thị, cho phép:
+   - **Đăng nhập**: Nhập tài khoản và mật khẩu để đăng nhập.
+   - **Đăng ký**: Nhập thông tin để tạo tài khoản mới.
+
+### 4.6. Kiểm Tra Kết Quả
+- **Đăng nhập thành công**: Server sẽ ghi log thông tin kết nối vào console hoặc file log.
+- **Đăng ký tài khoản**: Dữ liệu người dùng sẽ được lưu trực tiếp vào cơ sở dữ liệu MySQL thông qua JDBC.
+- **Giao diện Server**: Hỗ trợ các chức năng:
+  - Thêm người dùng.
+  - Sửa thông tin người dùng.
+  - Xóa người dùng.
+  - Đăng xuất người dùng.
+
+## Lưu Ý
+- Đảm bảo MySQL server đang chạy và cơ sở dữ liệu `NguoiDung` đã được tạo trước khi chạy chương trình.
+- Kiểm tra thông tin kết nối JDBC (URL, TEN_NGUOI_DUNG, MAT_KHAU) để đảm bảo chính xác.
+- Server phải được chạy trước khi Client kết nối.
 ## 📞 5. Liên hệ cá nhân  
 - 👤 Họ và tên: **ĐẶNG THANH BÌNH**  
 - 🎓 Lớp: **CNTT 16-04**  
