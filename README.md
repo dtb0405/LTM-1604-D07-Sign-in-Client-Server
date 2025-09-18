@@ -38,8 +38,6 @@ Trong đó:
 - **MySQL**: hệ quản trị cơ sở dữ liệu lưu trữ thông tin tài khoản người dùng.  
 - **JDBC**: cầu nối giữa ứng dụng Java và cơ sở dữ liệu MySQL.  
 
----
-
 ## 🖼️ 3. Một số hình ảnh hệ thống  
 
 ### 🔑 Giao diện đăng nhập từ Client
@@ -51,7 +49,6 @@ Trong đó:
 ### 🛠️ Giao diện Server quản lý tài khoản
 ![Server](docs/Server_dashboard.png)
 
----
 ## 🛠️ 4. Các bước cài đặt
 ### 4.1. Cài đặt môi trường
 - Cài đặt **JDK 8+**: [Download Java](https://www.oracle.com/java/technologies/javase-downloads.html)  
@@ -118,6 +115,7 @@ INSERT INTO users(tenDangNhap, matKhau) VALUES ('admin', 'admin1');
 - Đảm bảo MySQL server đang chạy và cơ sở dữ liệu `NguoiDung` đã được tạo trước khi chạy chương trình.
 - Kiểm tra thông tin kết nối JDBC (URL, TEN_NGUOI_DUNG, MAT_KHAU) để đảm bảo chính xác.
 - Server phải được chạy trước khi Client kết nối.
+
 ## 📞 5. Liên hệ cá nhân  
 - 👤 **Họ và tên**: *Đặng Thanh Bình*  
 - 🎓 **Lớp**: *CNTT 16-04*
