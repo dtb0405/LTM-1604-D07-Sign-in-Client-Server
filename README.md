@@ -42,14 +42,14 @@ Trong đó:
 
 ## 🖼️ 3. Một số hình ảnh hệ thống  
 
-### 🔑 Giao diện đăng nhập từ Client  
-![Login](docs/Client_login.png)  
+### 🔑 Giao diện đăng nhập từ Client
+![Login](docs/Client_login.png#width=50%)
 
-### 🔏 Giao diện đăng ký từ Client  
-![Register](docs/Client_register.png)  
+### 🔏 Giao diện đăng ký từ Client
+![Register](docs/Client_register.png#width=50%)
 
-### 🛠️ Giao diện Server quản lý tài khoản  
-![Server](docs/Server_dashboard.png)  
+### 🛠️ Giao diện Server quản lý tài khoản
+![Server](docs/Server_dashboard.png#width=50%)
 
 ---
 ## 🛠️ 4. Các bước cài đặt
