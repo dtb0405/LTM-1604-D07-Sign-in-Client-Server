@@ -4,7 +4,7 @@
     </a>
 </h2>
 <h2 align="center">
-   Hệ thống đăng nhập Client-Server (TCP Socket + Java Swing + MySQL)
+   Hệ thống đăng nhập Client-Server
 </h2>
 <div align="center">
     <p align="center">
@@ -20,11 +20,11 @@
 </div>
 
 ## 📖 1. Giới thiệu hệ thống
-Hệ thống đăng nhập Client-Server được xây dựng dựa trên mô hình giao tiếp TCP Socket giữa máy khách (Client) và máy chủ (Server). Trong hệ thống này, Server lắng nghe tại cổng (port) 2712 để nhận và xử lý các yêu cầu từ phía Client. Người dùng phía Client sẽ thực hiện thao tác đăng nhập bằng cách nhập tên tài khoản và mật khẩu, sau đó thông tin này sẽ được gửi tới Server thông qua kết nối TCP.
+Hệ thống đăng nhập Client-Server được xây dựng dựa trên mô hình giao tiếp TCP Socket giữa máy khách (Client) và máy chủ (Server). Trong hệ thống này, Server sẽ nhận và xử lý các yêu cầu từ phía Client. Người dùng phía Client sẽ thực hiện thao tác đăng nhập bằng cách nhập tên tài khoản và mật khẩu, sau đó thông tin này sẽ được gửi tới Server thông qua kết nối TCP.
 
 Phía Server có giao diện quản lý tài khoản trực quan, cho phép Thêm, Sửa, Xoá dữ liệu người dùng. Dữ liệu này được lưu trữ và quản lý trong cơ sở dữ liệu MySQL, được kết nối bằng JDBC (Java Database Connectivity), đảm bảo tính an toàn và toàn vẹn dữ liệu.
 
-## 🔧 2. Ngôn ngữ lập trình sử dụng  
+## 🔧 2. Công nghệ sử dụng   
 <div align="center">
 
 [![Java](https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=java&logoColor=white)](https://www.java.com/) 
