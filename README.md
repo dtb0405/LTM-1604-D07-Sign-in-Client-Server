@@ -39,14 +39,91 @@ Trong đó:
 
 ## 🖼️ 3. Một số hình ảnh hệ thống  
 
-### 🔑 Giao diện đăng nhập từ Client
-![Login](docs/Client_login.png)
+<div align="center">
 
-### 🔏 Giao diện đăng ký từ Client
-![Register](docs/Client_register.png)
+<table>
+  <tr>
+    <td align="center">
+      <img width="80%" src="docs/Client_login.png" /><br/>
+      <b>Giao diện đăng nhập</b>
+    </td>
+    <td align="center">
+      <img width="80%" src="docs/Client_register.png" /><br/>
+      <b>Giao diện đăng ký</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="80%" src="docs/Client_main.png" /><br/>
+      <b>Giao diện User (màn hình chính)</b>
+    </td>
+    <td align="center">
+      <img width="80%" src="docs/Client_profile.png" /><br/>
+      <b>Thông tin hồ sơ</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="80%" src="docs/Client_update.png" /><br/>
+      <b>Sửa thông tin User</b>
+    </td>
+    <td align="center">
+      <img width="80%" src="docs/Client_update_password.png" /><br/>
+      <b>Đổi mật khẩu</b>
+    </td>
+  </tr>
+</table>
 
-### 🛠️ Giao diện Server quản lý tài khoản
-![Server](docs/Server_dashboard.png)
+</div>
+
+
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center">
+      <img width="100%" src="docs/Server_dashboard.png" /><br/>
+      <b>Dashboard hệ thống</b>
+    </td>
+    <td align="center">
+      <img width="100%" src="docs/Server_main.png" /><br/>
+      <b>Màn hình chính của Server</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="100%" src="docs/Server_manage.png" /><br/>
+      <b>Quản lý tài khoản</b>
+    </td>
+    <td align="center">
+      <img width="80%" src="docs/Server_add_account.png" /><br/>
+      <b>Thêm tài khoản mới</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="80%" src="docs/Server_update_account.png" /><br/>
+      <b>Cập nhật tài khoản</b>
+    </td>
+    <td align="center">
+      <img width="80%" src="docs/Server_update_rule.png" /><br/>
+      <b>Cập nhật vai trò (Admin/User)</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="80%" src="docs/Server_delete_account.png" /><br/>
+      <b>Xóa tài khoản</b>
+    </td>
+    <td align="center">
+      <img width="80%" src="docs/Server_history.png" /><br/>
+      <b>Lịch sử đăng nhập</b>
+    </td>
+  </tr>
+</table>
+
+</div>
 
 ## 🛠️ 4. Các bước cài đặt
 ### 4.1. Cài đặt môi trường
