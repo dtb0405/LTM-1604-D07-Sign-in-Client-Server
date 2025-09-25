@@ -193,7 +193,7 @@ INSERT INTO users(tenDangNhap, matKhau) VALUES ('admin', 'admin1');
 - Server phải được chạy trước khi Client kết nối.
 
 ## 📞 5. Liên hệ cá nhân  
-- 👤 **Họ và tên**: *Đặng Thanh Bình*  
-- 🎓 **Lớp**: *CNTT 16-04*
-- 📧 **Email**: *dnagbinh12@gmail.com*  
-- 📱 **Số điện thoại**: *0822968881*  
+- 👨‍🎓 **Người thực hiện**: Đặng Thanh Bình
+- 🎓 **Khoa**: Công nghệ thông tin – Trường Đại học Đại Nam
+- 📞 **Số điện thoại**: 0822968881
+- 📧 **Email**: dnagbinh12@gmail.com
