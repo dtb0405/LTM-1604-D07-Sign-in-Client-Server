@@ -269,7 +269,7 @@ VALUES
 - **Xác nhận:** Hộp thoại xác nhận trước khi thực hiện
 - **Hiển thị:** Trạng thái được cập nhật trong bảng quản lý
 
-#### **✅ Lịch sử đăng nhập:**
+#### **Lịch sử đăng nhập:**
 - **Ghi log:** Mọi lần đăng nhập/đăng xuất được ghi lại
 - **Thông tin:** Tên đăng nhập, thời gian, địa chỉ IP, trạng thái, ghi chú
 - **Hiển thị:** Bảng lịch sử với màu xen kẽ (xanh nhạt/trắng)
