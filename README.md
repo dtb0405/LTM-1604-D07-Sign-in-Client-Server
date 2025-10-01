@@ -227,11 +227,6 @@ VALUES
 ### 4.6. Kiểm Tra Kết Quả
 #### **Đăng nhập thành công:**
 - **Server log:** Hiển thị thông tin kết nối chi tiết
-  ```
-  [2024-01-01 10:00:00] >>> Client kết nối từ: 192.168.1.100:54321
-  [2024-01-01 10:00:01] >>> Người dùng admin đã đăng nhập thành công
-  [2024-01-01 10:00:01] Tổng số client online: 1
-  ```
 - **Giao diện Server:** Hiển thị trạng thái "Đang chạy" và log real-time
 - **Giao diện Client:** Chuyển đến giao diện tương ứng (User/Admin)
 
