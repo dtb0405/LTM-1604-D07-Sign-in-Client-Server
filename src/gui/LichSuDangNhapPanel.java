@@ -22,7 +22,6 @@ public class LichSuDangNhapPanel extends JPanel {
     private JTable tableLichSu;
     private DefaultTableModel modelLichSu;
     private JButton btnXuatBaoCao;
-    private JComboBox<String> comboLoc;
     private JTextField txtTimKiem;
     private Timer timerTuDongLamMoi;
     private boolean isAutoRefresh = false;
@@ -51,44 +50,78 @@ public class LichSuDangNhapPanel extends JPanel {
         lblTieuDe.setForeground(new Color(25, 118, 210));
         panelTieuDe.add(lblTieuDe, BorderLayout.CENTER);
         
-        
         add(panelTieuDe, BorderLayout.NORTH);
         
-        // Panel bộ lọc
-        JPanel panelBoLoc = taoPanelBoLoc();
-        add(panelBoLoc, BorderLayout.CENTER);
+        // Panel chính chứa tìm kiếm và bảng
+        JPanel panelChinh = new JPanel(new BorderLayout());
+        panelChinh.setBackground(Color.WHITE);
+        
+        // Panel tìm kiếm
+        JPanel panelTimKiem = taoPanelTimKiem();
+        panelChinh.add(panelTimKiem, BorderLayout.NORTH);
         
         // Panel bảng
         JPanel panelBang = taoPanelBang();
-        add(panelBang, BorderLayout.CENTER);
+        panelChinh.add(panelBang, BorderLayout.CENTER);
+        
+        add(panelChinh, BorderLayout.CENTER);
         
         // Panel nút
         JPanel panelNut = taoPanelNut();
         add(panelNut, BorderLayout.SOUTH);
     }
     
-    private JPanel taoPanelBoLoc() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panel.setBackground(new Color(245, 245, 245));
+    private JPanel taoPanelTimKiem() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panel.setBackground(new Color(248, 249, 250));
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         
-        panel.add(new JLabel("Lọc theo:"));
+        // Label tìm kiếm
+        JLabel lblTimKiem = new JLabel("Tìm kiếm theo tên đăng nhập:");
+        lblTimKiem.setFont(new Font("Arial", Font.BOLD, 12));
+        lblTimKiem.setForeground(new Color(55, 71, 79));
+        panel.add(lblTimKiem);
         
-        comboLoc = new JComboBox<>(new String[]{"Tất cả", "Hôm nay", "Tuần này", "Tháng này"});
-        comboLoc.setPreferredSize(new Dimension(120, 30));
-        comboLoc.addActionListener(e -> lamMoiDuLieu());
-        panel.add(comboLoc);
+        // TextField tìm kiếm
+        txtTimKiem = new JTextField(25);
+        txtTimKiem.setFont(new Font("Arial", Font.PLAIN, 12));
+        txtTimKiem.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
         
-        panel.add(new JLabel("Tìm kiếm:"));
+        // Thêm DocumentListener để lọc tự động
+        txtTimKiem.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                timKiemTuDong();
+            }
+            
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                timKiemTuDong();
+            }
+            
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                timKiemTuDong();
+            }
+        });
         
-        txtTimKiem = new JTextField(20);
-        txtTimKiem.setPreferredSize(new Dimension(200, 30));
         panel.add(txtTimKiem);
         
-        JButton btnTimKiem = taoNutHienDai("Tìm", new Color(33, 150, 243));
-        btnTimKiem.setPreferredSize(new Dimension(80, 30));
+        // Nút tìm kiếm
+        JButton btnTimKiem = ButtonUtils.createSmallElevatedButton("Tìm kiếm", new Color(33, 150, 243));
         btnTimKiem.addActionListener(e -> timKiem());
         panel.add(btnTimKiem);
+        
+        // Nút làm mới
+        JButton btnLamMoi = ButtonUtils.createSmallElevatedButton("Làm mới", new Color(76, 175, 80));
+        btnLamMoi.addActionListener(e -> lamMoiTimKiem());
+        panel.add(btnLamMoi);
+        
+        // Thêm sự kiện Enter cho textfield
+        txtTimKiem.addActionListener(e -> timKiem());
         
         return panel;
     }
@@ -99,7 +132,7 @@ public class LichSuDangNhapPanel extends JPanel {
         panel.setBackground(Color.WHITE);
         
         // Tạo bảng
-        String[] cot = {"STT", "Tên đăng nhập", "Thời gian đăng nhập", "Lần đăng nhập cuối", 
+        String[] cot = {"STT", "Tên đăng nhập", "Thời gian đăng nhập", "Thời gian đăng xuất", 
                         "Địa chỉ IP", "Trạng thái", "Ghi chú"};
         modelLichSu = new DefaultTableModel(cot, 0) {
             @Override
@@ -177,11 +210,12 @@ public class LichSuDangNhapPanel extends JPanel {
     }
     
     private JPanel taoPanelNut() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
         panel.setBackground(new Color(248, 249, 250));
-        panel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        panel.setBorder(new EmptyBorder(25, 25, 25, 25));
+        panel.setPreferredSize(new Dimension(500, 100)); // Tăng kích thước để đảm bảo đủ không gian
         
-        btnXuatBaoCao = taoNutHienDai("Xuất Báo Cáo", new Color(46, 125, 50));
+        btnXuatBaoCao = ButtonUtils.createGreenCoolButton("Xuất Báo Cáo");
         btnXuatBaoCao.addActionListener(e -> xuatBaoCao());
         panel.add(btnXuatBaoCao);
         
@@ -221,13 +255,7 @@ public class LichSuDangNhapPanel extends JPanel {
             }
         };
         
-        button.setPreferredSize(new Dimension(160, 50));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        
-        return button;
+        return ButtonUtils.createElevatedButton(text, mauNen);
     }
     
     public void lamMoiDuLieu() {
@@ -259,12 +287,12 @@ public class LichSuDangNhapPanel extends JPanel {
                         // Thêm dữ liệu thực từ database với STT và thay đổi cột
                         int stt = 1;
                         for (String[] record : lichSu) {
-                            // Tạo row mới với STT và thay đổi cột thời gian đăng xuất thành lần đăng nhập cuối
+                            // Tạo row mới với STT và thay đổi cột thời gian đăng xuất thành Thời gian đăng xuất
                             Object[] newRow = {
                                 stt++, // STT
                                 record[1], // Tên đăng nhập
                                 record[2], // Thời gian đăng nhập
-                                record[3], // Lần đăng nhập cuối (thay vì thời gian đăng xuất)
+                                record[3], // Thời gian đăng xuất (thay vì thời gian đăng xuất)
                                 record[4], // Địa chỉ IP
                                 record[5], // Trạng thái
                                 record[6]  // Ghi chú
@@ -310,77 +338,85 @@ public class LichSuDangNhapPanel extends JPanel {
             return;
         }
         
-        // Tìm kiếm trong dữ liệu hiện tại
+        // Lấy dữ liệu từ database
+        KetNoiDatabase db = KetNoiDatabase.getInstance();
+        List<String[]> lichSu = db.layLichSuDangNhap();
+        
+        // Xóa dữ liệu cũ
         modelLichSu.setRowCount(0);
-        
-        // Dữ liệu để tìm kiếm (giống như trong themDuLieuGia)
-        String[] tenDangNhap = {"admin", "user001", "user002", "user003", "user004", "user005",
-                               "user006", "user007", "user008", "user009", "user010", "user011",
-                               "user012", "user013", "user014", "user015", "user016", "user017",
-                               "user018", "user019", "user020", "user021", "user022", "user023",
-                               "user024", "user025", "user026", "user027", "user028", "user029"};
-        
-        String[] ipAddress = {"127.0.0.1", "192.168.1.100", "192.168.1.101", "192.168.1.102", 
-                             "192.168.1.103", "192.168.1.104", "192.168.1.105", "192.168.1.106",
-                             "192.168.1.107", "192.168.1.108", "192.168.1.109", "192.168.1.110",
-                             "192.168.1.111", "192.168.1.112", "192.168.1.113", "192.168.1.114",
-                             "192.168.1.115", "192.168.1.116", "192.168.1.117", "192.168.1.118",
-                             "192.168.1.119", "192.168.1.120", "192.168.1.121", "192.168.1.122",
-                             "192.168.1.123", "192.168.1.124", "192.168.1.125", "192.168.1.126",
-                             "192.168.1.127", "192.168.1.128"};
-        
-        String[] trangThai = {"Thành công", "Thành công", "Thành công", "Thất bại", "Thành công",
-                             "Thành công", "Thất bại", "Thành công", "Thành công", "Thành công",
-                             "Thành công", "Thành công", "Thất bại", "Thành công", "Thành công",
-                             "Thành công", "Thành công", "Thành công", "Thất bại", "Thành công",
-                             "Thành công", "Thành công", "Thành công", "Thành công", "Thành công",
-                             "Thành công", "Thành công", "Thành công", "Thành công", "Thành công"};
-        
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        java.util.Calendar cal = java.util.Calendar.getInstance();
         
         int ketQuaTimKiem = 0;
         
-        // Tìm kiếm trong 30 bản ghi
-        for (int i = 0; i < 30; i++) {
-            // Kiểm tra tên đăng nhập hoặc IP có chứa từ khóa không
-            if (tenDangNhap[i].toLowerCase().contains(tuKhoa.toLowerCase()) ||
-                ipAddress[i].contains(tuKhoa) ||
-                trangThai[i].toLowerCase().contains(tuKhoa.toLowerCase())) {
-                
-                // Tạo dữ liệu cho bản ghi tìm thấy
-                cal.setTime(new Date());
-                cal.add(java.util.Calendar.DAY_OF_MONTH, -(i % 7));
-                cal.set(java.util.Calendar.HOUR_OF_DAY, 8 + (i % 12));
-                cal.set(java.util.Calendar.MINUTE, (i * 15) % 60);
-                cal.set(java.util.Calendar.SECOND, (i * 30) % 60);
-                String thoiGianDangNhap = sdf.format(cal.getTime());
-                
-                String thoiGianDangXuat;
-                if (trangThai[i].equals("Thành công")) {
-                    cal.add(java.util.Calendar.HOUR_OF_DAY, 1 + (i % 8));
-                    cal.set(java.util.Calendar.MINUTE, (i * 20) % 60);
-                    thoiGianDangXuat = sdf.format(cal.getTime());
-                } else {
-                    thoiGianDangXuat = "Lỗi kết nối";
+        if (lichSu != null && !lichSu.isEmpty()) {
+            for (String[] record : lichSu) {
+                // Kiểm tra tên đăng nhập có chứa từ khóa không
+                if (record[1] != null && record[1].toLowerCase().contains(tuKhoa.toLowerCase())) {
+                    Object[] newRow = {
+                        ketQuaTimKiem + 1, // STT
+                        record[1], // Tên đăng nhập
+                        record[2], // Thời gian đăng nhập
+                        record[3], // Thời gian đăng xuất
+                        record[4], // Địa chỉ IP
+                        record[5], // Trạng thái
+                        record[6]  // Ghi chú
+                    };
+                    modelLichSu.addRow(newRow);
+                    ketQuaTimKiem++;
                 }
-                
-                Object[] row = {i + 1, tenDangNhap[i], thoiGianDangNhap, thoiGianDangXuat, 
-                               ipAddress[i], trangThai[i]};
-                
-                modelLichSu.addRow(row);
-                ketQuaTimKiem++;
             }
         }
         
         if (ketQuaTimKiem == 0) {
-            JOptionPane.showMessageDialog(this, 
-                "Không tìm thấy kết quả nào cho từ khóa: " + tuKhoa, 
+            JOptionPane.showMessageDialog(this, "Không tìm thấy lịch sử đăng nhập nào phù hợp!", 
                 "Kết quả tìm kiếm", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, 
-                "Tìm thấy " + ketQuaTimKiem + " kết quả cho từ khóa: " + tuKhoa, 
-                "Kết quả tìm kiếm", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    /**
+     * Làm mới tìm kiếm
+     */
+    private void lamMoiTimKiem() {
+        txtTimKiem.setText("");
+        lamMoiDuLieu();
+    }
+    
+    /**
+     * Tìm kiếm tự động khi nhập
+     */
+    private void timKiemTuDong() {
+        String tuKhoa = txtTimKiem.getText().trim();
+        
+        if (tuKhoa.isEmpty()) {
+            lamMoiDuLieu();
+            return;
+        }
+        
+        // Lấy dữ liệu từ database
+        KetNoiDatabase db = KetNoiDatabase.getInstance();
+        List<String[]> lichSu = db.layLichSuDangNhap();
+        
+        // Xóa dữ liệu cũ
+        modelLichSu.setRowCount(0);
+        
+        int ketQuaTimKiem = 0;
+        
+        if (lichSu != null && !lichSu.isEmpty()) {
+            for (String[] record : lichSu) {
+                // Kiểm tra tên đăng nhập có chứa từ khóa không
+                if (record[1] != null && record[1].toLowerCase().contains(tuKhoa.toLowerCase())) {
+                    Object[] newRow = {
+                        ketQuaTimKiem + 1, // STT
+                        record[1], // Tên đăng nhập
+                        record[2], // Thời gian đăng nhập
+                        record[3], // Thời gian đăng xuất
+                        record[4], // Địa chỉ IP
+                        record[5], // Trạng thái
+                        record[6]  // Ghi chú
+                    };
+                    modelLichSu.addRow(newRow);
+                    ketQuaTimKiem++;
+                }
+            }
         }
     }
     
@@ -403,7 +439,7 @@ public class LichSuDangNhapPanel extends JPanel {
                 
                 // Ghi tiêu đề cột
                 writer.write(String.format("%-5s %-20s %-25s %-25s %-15s %-15s\n", 
-                    "STT", "Tên đăng nhập", "Thời gian đăng nhập", "Lần đăng nhập cuối", 
+                    "STT", "Tên đăng nhập", "Thời gian đăng nhập", "Thời gian đăng xuất", 
                     "Địa chỉ IP", "Trạng thái"));
                 writer.write("=".repeat(110) + "\n");
                 
@@ -413,7 +449,7 @@ public class LichSuDangNhapPanel extends JPanel {
                         modelLichSu.getValueAt(i, 0), // STT
                         modelLichSu.getValueAt(i, 1), // Tên đăng nhập
                         modelLichSu.getValueAt(i, 2), // Thời gian đăng nhập
-                        modelLichSu.getValueAt(i, 3), // Lần đăng nhập cuối
+                        modelLichSu.getValueAt(i, 3), // Thời gian đăng xuất
                         modelLichSu.getValueAt(i, 4), // Địa chỉ IP
                         modelLichSu.getValueAt(i, 5)  // Trạng thái
                     ));

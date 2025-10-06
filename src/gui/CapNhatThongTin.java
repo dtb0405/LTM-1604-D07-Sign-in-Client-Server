@@ -174,11 +174,11 @@ public class CapNhatThongTin extends JDialog {
         panelNut.setOpaque(false);
         panelNut.setBorder(new EmptyBorder(15, 15, 15, 15));
         
-        JButton btnCapNhat = taoNutHienDai("Cập Nhật", new Color(255, 192, 203)); // Hồng thường
+        JButton btnCapNhat = ButtonUtils.createCoolButton("Cập Nhật");
         btnCapNhat.addActionListener(e -> capNhatThongTin());
         panelNut.add(btnCapNhat);
         
-        JButton btnHuy = taoNutHienDai("Hủy", new Color(255, 105, 180)); // Hồng đậm
+        JButton btnHuy = ButtonUtils.createRedCoolButton("Hủy");
         btnHuy.addActionListener(e -> dispose());
         panelNut.add(btnHuy);
         
@@ -193,40 +193,7 @@ public class CapNhatThongTin extends JDialog {
     }
     
     private JButton taoNutHienDai(String text, Color mauNen) {
-        JButton button = new JButton() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // Vẽ nền màu hồng đơn giản
-                g2d.setColor(mauNen);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-                
-                // Vẽ viền bo tròn đơn giản
-                g2d.setColor(new Color(255, 105, 180)); // Hồng đậm hơn một chút
-                g2d.setStroke(new BasicStroke(2));
-                g2d.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 15, 15);
-                
-                // Vẽ text
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Arial", Font.BOLD, 14));
-                FontMetrics fm = g2d.getFontMetrics();
-                int textWidth = fm.stringWidth(text);
-                int textHeight = fm.getHeight();
-                int x = (getWidth() - textWidth) / 2;
-                int y = (getHeight() + textHeight / 2) / 2;
-                g2d.drawString(text, x, y);
-            }
-        };
-        
-        button.setPreferredSize(new Dimension(140, 50));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        
-        return button;
+        return ButtonUtils.createElevatedButton(text, mauNen);
     }
     
     private void dienThongTinHienTai() {
@@ -308,15 +275,8 @@ public class CapNhatThongTin extends JDialog {
         // Cập nhật vào database
         try {
             database.KetNoiDatabase db = database.KetNoiDatabase.getInstance();
-            System.out.println("Đang cập nhật tài khoản ID: " + taiKhoan.getId());
-            System.out.println("Họ tên: " + hoTen);
-            System.out.println("Email: " + emailForDB);
-            System.out.println("Số điện thoại: " + soDienThoaiForDB);
-            System.out.println("Vai trò: " + taiKhoan.getVaiTro());
-            System.out.println("Ngày sinh: " + ngaySinh);
             
             boolean result = db.capNhatTaiKhoan(taiKhoan.getId(), hoTen, emailForDB, soDienThoaiForDB, taiKhoan.getVaiTro(), ngaySinh);
-            System.out.println("Kết quả cập nhật: " + result);
             
             if (result) {
                 JOptionPane.showMessageDialog(this, 

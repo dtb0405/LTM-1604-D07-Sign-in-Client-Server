@@ -8,6 +8,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 import java.util.Timer;
 
 /**
@@ -158,8 +159,47 @@ public class GiaoDienUser extends JFrame {
      * Khởi tạo timer lắng nghe thông báo từ server
      */
     private void khoiTaoTimerLangNghe() {
-        // Timer lắng nghe đã bị tắt
-        timerLangNghe = null;
+        if (timerLangNghe != null) {
+            timerLangNghe.cancel();
+        }
+        
+        timerLangNghe = new Timer("UserMessageListener", true);
+        timerLangNghe.scheduleAtFixedRate(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                SwingUtilities.invokeLater(() -> {
+                    kiemTraThongBaoTuServer();
+                });
+            }
+        }, 0, 2000); // Kiểm tra mỗi 2 giây
+    }
+    
+    /**
+     * Kiểm tra thông báo từ server
+     */
+    private void kiemTraThongBaoTuServer() {
+        try {
+            // Kiểm tra trạng thái tài khoản trong database
+            if (taiKhoanHienTai != null) {
+                database.KetNoiDatabase db = database.KetNoiDatabase.getInstance();
+                database.TaiKhoan taiKhoanMoi = db.timTaiKhoanTheoTen(taiKhoanHienTai.getTenDangNhap());
+                
+                if (taiKhoanMoi != null && !taiKhoanMoi.taiKhoanHoatDong()) {
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, 
+                            "Tài khoản của bạn đã bị khóa bởi quản trị viên.\n" +
+                            "Bạn sẽ bị đăng xuất khỏi hệ thống.",
+                            "Tài khoản bị khóa", JOptionPane.WARNING_MESSAGE);
+                        
+                        // Đóng giao diện và quay về màn hình đăng nhập
+                        thucHienDangXuat(false);
+                    });
+                }
+            }
+        } catch (Exception e) {
+            // Không hiển thị lỗi để tránh spam
+            System.err.println("Lỗi kiểm tra trạng thái tài khoản: " + e.getMessage());
+        }
     }
     
     /**
@@ -196,6 +236,10 @@ public class GiaoDienUser extends JFrame {
         panel.setOpaque(false);
         panel.setBorder(new EmptyBorder(20, 20, 10, 20));
         
+        // Ảnh đại diện
+        JLabel lblAvatar = taoAnhDaiDien();
+        panel.add(lblAvatar);
+        
         // Link Hồ sơ
         JLabel linkHoSo = taoLink("Hồ sơ");
         linkHoSo.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -215,6 +259,16 @@ public class GiaoDienUser extends JFrame {
             }
         });
         panel.add(linkCapNhat);
+        
+        // Link Quản lý ảnh đại diện
+        JLabel linkAnhDaiDien = taoLink("Ảnh đại diện");
+        linkAnhDaiDien.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                moQuanLyAnhDaiDien();
+            }
+        });
+        panel.add(linkAnhDaiDien);
         
         // Link Đổi mật khẩu
         JLabel linkDoiMatKhau = taoLink("Đổi mật khẩu");
@@ -439,102 +493,21 @@ public class GiaoDienUser extends JFrame {
     }
     
     private JButton taoNutDep(String text, Color mauNen1, Color mauNen2) {
-        JButton button = new JButton(text) {
-            private boolean isHovered = false;
-            private boolean isPressed = false;
-            
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // Màu nền động dựa trên trạng thái
-                Color backgroundColor = mauNen1;
-                if (isPressed) {
-                    backgroundColor = mauNen1.darker();
-                } else if (isHovered) {
-                    backgroundColor = mauNen1.brighter();
-                }
-                
-                // Vẽ shadow với độ mờ động
-                int shadowOffset = isPressed ? 1 : 3;
-                g2d.setColor(new Color(0, 0, 0, isHovered ? 40 : 30));
-                g2d.fillRoundRect(shadowOffset, shadowOffset, getWidth(), getHeight(), 25, 25);
-                
-                // Vẽ background chính
-                g2d.setColor(backgroundColor);
-                g2d.fillRoundRect(0, 0, getWidth() - shadowOffset, getHeight() - shadowOffset, 25, 25);
-                
-                // Vẽ border với độ dày động
-                g2d.setColor(new Color(0, 0, 0, isHovered ? 30 : 20));
-                g2d.setStroke(new BasicStroke(isHovered ? 2 : 1));
-                g2d.drawRoundRect(0, 0, getWidth() - shadowOffset, getHeight() - shadowOffset, 25, 25);
-                
-                // Vẽ text với hiệu ứng
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Arial", Font.BOLD, 14));
-                FontMetrics fm = g2d.getFontMetrics();
-                int textWidth = fm.stringWidth(text);
-                int textHeight = fm.getHeight();
-                int x = (getWidth() - textWidth) / 2;
-                int y = (getHeight() + textHeight / 2) / 2;
-                
-                // Hiệu ứng text shadow khi hover
-                if (isHovered) {
-                    g2d.setColor(new Color(0, 0, 0, 50));
-                    g2d.drawString(text, x + 1, y + 1);
-                }
-                g2d.setColor(Color.WHITE);
-                g2d.drawString(text, x, y);
-            }
-            
-            @Override
-            public void addNotify() {
-                super.addNotify();
-                addMouseListener(new java.awt.event.MouseAdapter() {
-                    @Override
-                    public void mouseEntered(java.awt.event.MouseEvent e) {
-                        isHovered = true;
-                        repaint();
-                    }
-                    
-                    @Override
-                    public void mouseExited(java.awt.event.MouseEvent e) {
-                        isHovered = false;
-                        repaint();
-                    }
-                    
-                    @Override
-                    public void mousePressed(java.awt.event.MouseEvent e) {
-                        isPressed = true;
-                        repaint();
-                    }
-                    
-                    @Override
-                    public void mouseReleased(java.awt.event.MouseEvent e) {
-                        isPressed = false;
-                        repaint();
-                    }
-                });
-            }
-        };
-        
-        button.setFont(new Font("Arial", Font.BOLD, 14));
-        button.setPreferredSize(new Dimension(200, 55));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        
-        return button;
+        return ButtonUtils.createLargeElevatedButton(text, mauNen1);
     }
     
     private void capNhatThongTinTaiKhoan() {
         // Cập nhật label chào mừng với tên mới
         if (lblChaoMung != null && taiKhoanHienTai != null) {
             lblChaoMung.setText("Xin chào, \"" + taiKhoanHienTai.getHoTen() + "\"");
-            System.out.println("Đã cập nhật tên hiển thị: " + taiKhoanHienTai.getHoTen());
         }
+    }
+    
+    /**
+     * Getter cho tài khoản hiện tại
+     */
+    public database.TaiKhoan getTaiKhoanHienTai() {
+        return taiKhoanHienTai;
     }
     
     
@@ -569,6 +542,9 @@ public class GiaoDienUser extends JFrame {
     }
     
     private void thucHienDangXuat(boolean hienThiThongBao) {
+        // Dừng timer
+        dungTimerLangNghe();
+        
         // Gửi yêu cầu đăng xuất tới server
         if (ketNoi.dangXuat()) {
             if (hienThiThongBao) {
@@ -585,5 +561,201 @@ public class GiaoDienUser extends JFrame {
         SwingUtilities.invokeLater(() -> {
             new ManHinhDangNhap().setVisible(true);
         });
+    }
+    
+    /**
+     * Tạo ảnh đại diện với hiệu ứng đẹp
+     */
+    private JLabel taoAnhDaiDien() {
+        JLabel lblAvatar = new JLabel();
+        lblAvatar.setPreferredSize(new Dimension(80, 80));
+        lblAvatar.setBorder(null); // Bỏ viền vuông
+        lblAvatar.setHorizontalAlignment(SwingConstants.CENTER);
+        lblAvatar.setVerticalAlignment(SwingConstants.CENTER);
+        
+        // Hiệu ứng hover
+        lblAvatar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                lblAvatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                lblAvatar.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            }
+            
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                moQuanLyAnhDaiDien();
+            }
+        });
+        
+        // Load ảnh đại diện hiện tại
+        taiAnhDaiDien(lblAvatar);
+        
+        // Force hiển thị ngay lập tức
+        SwingUtilities.invokeLater(() -> {
+            lblAvatar.repaint();
+        });
+        
+        return lblAvatar;
+    }
+    
+    /**
+     * Tải ảnh đại diện hiện tại
+     */
+    private void taiAnhDaiDien(JLabel lblAvatar) {
+        try {
+            database.KetNoiDatabase db = database.KetNoiDatabase.getInstance();
+            String avatarPath = db.layAnhDaiDien(taiKhoanHienTai.getId());
+            
+            if (avatarPath != null && !avatarPath.isEmpty() && !avatarPath.equals("default_avatar.png")) {
+                java.io.File avatarFile = new java.io.File(avatarPath);
+                if (avatarFile.exists()) {
+                    java.awt.image.BufferedImage avatarImage = javax.imageio.ImageIO.read(avatarFile);
+                    BufferedImage croppedImage = cropToSquare(avatarImage, 80);
+                    ImageIcon icon = new ImageIcon(croppedImage);
+                    lblAvatar.setIcon(icon);
+                    lblAvatar.setText("");
+                    lblAvatar.repaint(); // Force repaint
+                } else {
+                    hienThiAnhMacDinh(lblAvatar);
+                }
+            } else {
+                hienThiAnhMacDinh(lblAvatar);
+            }
+        } catch (Exception e) {
+            // Luôn hiển thị ảnh mặc định khi có lỗi
+            hienThiAnhMacDinh(lblAvatar);
+        }
+    }
+    
+    /**
+     * Hiển thị ảnh mặc định
+     */
+    private void hienThiAnhMacDinh(JLabel lblAvatar) {
+        // Tạo ảnh mặc định với icon user
+        BufferedImage defaultImage = new BufferedImage(80, 80, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = defaultImage.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        
+        // Vẽ nền tròn
+        g2d.setColor(new Color(200, 200, 200));
+        g2d.fillOval(5, 5, 70, 70);
+        
+        // Vẽ chữ cái đầu của tên đăng nhập user
+        g2d.setColor(new Color(100, 100, 100));
+        g2d.setFont(new Font("Arial", Font.BOLD, 28));
+        FontMetrics fm = g2d.getFontMetrics();
+        String text = "U"; // Default fallback
+        if (taiKhoanHienTai != null && taiKhoanHienTai.getTenDangNhap() != null && !taiKhoanHienTai.getTenDangNhap().isEmpty()) {
+            text = taiKhoanHienTai.getTenDangNhap().substring(0, 1).toUpperCase();
+        }
+        int x = (80 - fm.stringWidth(text)) / 2;
+        int y = (80 - fm.getHeight()) / 2 + fm.getAscent();
+        g2d.drawString(text, x, y);
+        
+        g2d.dispose();
+        
+        ImageIcon icon = new ImageIcon(defaultImage);
+        lblAvatar.setIcon(icon);
+        lblAvatar.setText("");
+        lblAvatar.repaint(); // Force repaint
+    }
+    
+    /**
+     * Mở dialog quản lý ảnh đại diện
+     */
+    private void moQuanLyAnhDaiDien() {
+        try {
+            database.KetNoiDatabase db = database.KetNoiDatabase.getInstance();
+            String currentAvatarPath = db.layAnhDaiDien(taiKhoanHienTai.getId());
+            
+            AvatarUploadDialog dialog = new AvatarUploadDialog(this, currentAvatarPath, () -> {
+                // Callback khi ảnh được thay đổi
+                capNhatAnhDaiDien();
+            });
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi khi mở quản lý ảnh đại diện: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    /**
+     * Cắt ảnh thành hình vuông thông minh - tự động cắt để vừa khung
+     */
+    private BufferedImage cropToSquare(BufferedImage originalImage, int size) {
+        if (originalImage == null) {
+            return null;
+        }
+        
+        int originalWidth = originalImage.getWidth();
+        int originalHeight = originalImage.getHeight();
+        
+        // Tạo ảnh vuông mới với nền trong suốt
+        BufferedImage squareImage = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = squareImage.createGraphics();
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+        
+        // Tính toán vùng cắt thông minh
+        int cropSize;
+        int startX, startY;
+        
+        if (originalWidth > originalHeight) {
+            // Ảnh ngang - cắt theo chiều rộng, giữ chiều cao
+            cropSize = originalHeight;
+            startX = (originalWidth - cropSize) / 2; // Cắt ở giữa
+            startY = 0;
+        } else if (originalHeight > originalWidth) {
+            // Ảnh dọc - cắt theo chiều cao, giữ chiều rộng
+            cropSize = originalWidth;
+            startX = 0;
+            startY = (originalHeight - cropSize) / 2; // Cắt ở giữa
+        } else {
+            // Ảnh vuông - giữ nguyên
+            cropSize = Math.min(originalWidth, originalHeight);
+            startX = 0;
+            startY = 0;
+        }
+        
+        // Vẽ ảnh đã cắt và resize để vừa khung vuông
+        g2d.drawImage(originalImage, 0, 0, size, size, 
+                     startX, startY, startX + cropSize, startY + cropSize, null);
+        
+        g2d.dispose();
+        return squareImage;
+    }
+    
+    /**
+     * Cập nhật ảnh đại diện trong giao diện
+     */
+    private void capNhatAnhDaiDien() {
+        // Tìm và cập nhật ảnh đại diện trong navigation panel
+        JPanel backgroundPanel = (JPanel) getContentPane().getComponent(0);
+        JPanel navigationPanel = (JPanel) backgroundPanel.getComponent(0);
+        
+        // Tìm JLabel avatar trong navigation panel (tìm label có kích thước 80x80)
+        for (Component comp : navigationPanel.getComponents()) {
+            if (comp instanceof JLabel) {
+                JLabel label = (JLabel) comp;
+                Dimension size = label.getPreferredSize();
+                if (size != null && size.width == 80 && size.height == 80) {
+                    // Đây là avatar label
+                    taiAnhDaiDien(label);
+                    label.repaint(); // Force repaint
+                    break;
+                }
+            }
+        }
+        
+        // Force repaint toàn bộ navigation panel
+        navigationPanel.repaint();
     }
 }

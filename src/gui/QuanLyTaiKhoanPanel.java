@@ -27,6 +27,12 @@ public class QuanLyTaiKhoanPanel extends JPanel {
     private Timer timerTuDongLamMoi;
     private boolean isAutoRefresh = false;
     
+    // Thêm các component cho tìm kiếm và lọc
+    private JTextField txtTimKiem;
+    private JComboBox<String> comboLocTrangThai;
+    private JButton btnTimKiem;
+    private JButton btnLamMoiLoc;
+    
     public QuanLyTaiKhoanPanel(KetNoiTCP ketNoi) {
         this.ketNoi = ketNoi;
         khoiTaoGiaoDien();
@@ -68,6 +74,10 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         panel.setBorder(new EmptyBorder(10, 10, 10, 10));
         panel.setBackground(Color.WHITE);
         
+        // Panel tìm kiếm và lọc
+        JPanel panelTimKiem = taoPanelTimKiem();
+        panel.add(panelTimKiem, BorderLayout.NORTH);
+        
         // Tạo bảng
         String[] cot = {"ID", "Tên đăng nhập", "Họ tên", "Email", "Số điện thoại", "Ngày sinh",
                        "Vai trò", "Trạng thái", "Online/Offline", "Ngày tạo"};
@@ -83,19 +93,37 @@ public class QuanLyTaiKhoanPanel extends JPanel {
             public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
                 Component c = super.prepareRenderer(renderer, row, column);
                 
-                // Màu xen kẽ cho các dòng
-                if (row % 2 == 0) {
-                    c.setBackground(new Color(248, 250, 252)); // Màu xanh nhạt
+                // Lấy thông tin trạng thái từ dòng
+                String trangThai = "";
+                String onlineStatus = "";
+                if (getModel().getRowCount() > row) {
+                    trangThai = (String) getModel().getValueAt(row, 7); // Cột "Trạng thái"
+                    onlineStatus = (String) getModel().getValueAt(row, 8); // Cột "Online/Offline"
+                }
+                
+                // Màu nền dựa trên trạng thái
+                if ("Bị khóa".equals(trangThai)) {
+                    // Tài khoản bị khóa - màu đỏ nhạt
+                    c.setBackground(new Color(255, 235, 238)); // Đỏ nhạt
+                    c.setForeground(new Color(197, 17, 98)); // Đỏ đậm cho text
+                } else if ("Online".equals(onlineStatus)) {
+                    // Tài khoản đang online - màu xanh nhạt
+                    c.setBackground(new Color(232, 245, 233)); // Xanh nhạt
+                    c.setForeground(new Color(27, 94, 32)); // Xanh đậm cho text
                 } else {
-                    c.setBackground(Color.WHITE); // Màu trắng
+                    // Tài khoản bình thường - màu xen kẽ
+                    if (row % 2 == 0) {
+                        c.setBackground(new Color(248, 250, 252)); // Màu xanh nhạt
+                    } else {
+                        c.setBackground(Color.WHITE); // Màu trắng
+                    }
+                    c.setForeground(Color.BLACK);
                 }
                 
                 // Màu khi được chọn
                 if (isRowSelected(row)) {
                     c.setBackground(new Color(25, 118, 210)); // Màu xanh dương
                     c.setForeground(Color.WHITE);
-                } else {
-                    c.setForeground(Color.BLACK);
                 }
                 
                 return c;
@@ -105,6 +133,16 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         tableTaiKhoan.setRowHeight(25);
         tableTaiKhoan.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
         tableTaiKhoan.getTableHeader().setReorderingAllowed(false); // Không cho phép di chuyển cột
+        
+        // Thêm MouseListener để xử lý double-click
+        tableTaiKhoan.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (e.getClickCount() == 2) { // Double-click
+                    hienThiLichSuDangNhap();
+                }
+            }
+        });
         
         // Bo góc cho bảng
         tableTaiKhoan.setBorder(BorderFactory.createEmptyBorder());
@@ -138,68 +176,98 @@ public class QuanLyTaiKhoanPanel extends JPanel {
     }
     
     private JButton taoNutHienDai(String text, Color mauNen) {
-        JButton button = new JButton() {
+        return ButtonUtils.createElevatedButton(text, mauNen);
+    }
+    
+    private JPanel taoPanelTimKiem() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panel.setBackground(new Color(248, 249, 250));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        
+        // Label tìm kiếm
+        JLabel lblTimKiem = new JLabel("Tìm kiếm:");
+        lblTimKiem.setFont(new Font("Arial", Font.BOLD, 12));
+        panel.add(lblTimKiem);
+        
+        // TextField tìm kiếm
+        txtTimKiem = new JTextField(20);
+        txtTimKiem.setFont(new Font("Arial", Font.PLAIN, 12));
+        txtTimKiem.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        
+        // Thêm DocumentListener để lọc tự động
+        txtTimKiem.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // Vẽ shadow
-                g2d.setColor(new Color(0, 0, 0, 30));
-                g2d.fillRoundRect(3, 3, getWidth(), getHeight(), 25, 25);
-                
-                // Vẽ background chính
-                g2d.setColor(mauNen);
-                g2d.fillRoundRect(0, 0, getWidth() - 3, getHeight() - 3, 25, 25);
-                
-                // Vẽ border
-                g2d.setColor(new Color(0, 0, 0, 20));
-                g2d.setStroke(new BasicStroke(1));
-                g2d.drawRoundRect(0, 0, getWidth() - 3, getHeight() - 3, 25, 25);
-                
-                // Vẽ text
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Arial", Font.BOLD, 13));
-                FontMetrics fm = g2d.getFontMetrics();
-                int textWidth = fm.stringWidth(text);
-                int textHeight = fm.getHeight();
-                int x = (getWidth() - textWidth) / 2;
-                int y = (getHeight() + textHeight / 2) / 2;
-                g2d.drawString(text, x, y);
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                timKiemTuDong();
             }
-        };
+            
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                timKiemTuDong();
+            }
+            
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                timKiemTuDong();
+            }
+        });
         
-        button.setPreferredSize(new Dimension(150, 50));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
+        panel.add(txtTimKiem);
         
-        return button;
+        // Label lọc trạng thái
+        JLabel lblLoc = new JLabel("Lọc theo trạng thái:");
+        lblLoc.setFont(new Font("Arial", Font.BOLD, 12));
+        panel.add(lblLoc);
+        
+        // ComboBox lọc trạng thái
+        comboLocTrangThai = new JComboBox<>(new String[]{"Tất cả", "Hoạt động", "Bị khóa"});
+        comboLocTrangThai.setFont(new Font("Arial", Font.PLAIN, 12));
+        comboLocTrangThai.setPreferredSize(new Dimension(100, 30));
+        comboLocTrangThai.addActionListener(e -> timKiemTuDong());
+        panel.add(comboLocTrangThai);
+        
+        // Nút tìm kiếm
+        btnTimKiem = ButtonUtils.createSmallElevatedButton("Tìm kiếm", new Color(33, 150, 243));
+        btnTimKiem.addActionListener(e -> timKiemTaiKhoan());
+        panel.add(btnTimKiem);
+        
+        // Nút làm mới lọc
+        btnLamMoiLoc = ButtonUtils.createSmallElevatedButton("Làm mới", new Color(76, 175, 80));
+        btnLamMoiLoc.addActionListener(e -> lamMoiLoc());
+        panel.add(btnLamMoiLoc);
+        
+        // Thêm sự kiện Enter cho textfield
+        txtTimKiem.addActionListener(e -> timKiemTaiKhoan());
+        
+        return panel;
     }
     
     private JPanel taoPanelNut() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         panel.setBackground(new Color(248, 249, 250));
-        panel.setBorder(new EmptyBorder(15, 15, 15, 15));
+        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        panel.setPreferredSize(new Dimension(1000, 120)); // Đảm bảo đủ không gian cho tất cả nút
         
-        btnThemTaiKhoan = taoNutHienDai("Thêm Tài Khoản", new Color(46, 125, 50));
+        btnThemTaiKhoan = ButtonUtils.createGreenCoolButton("Thêm Tài Khoản");
         btnThemTaiKhoan.addActionListener(e -> themTaiKhoan());
         panel.add(btnThemTaiKhoan);
         
-        btnSuaTaiKhoan = taoNutHienDai("Sửa Thông Tin", new Color(255, 152, 0));
+        btnSuaTaiKhoan = ButtonUtils.createOrangeCoolButton("Sửa Thông Tin");
         btnSuaTaiKhoan.addActionListener(e -> suaTaiKhoan());
         panel.add(btnSuaTaiKhoan);
         
-        btnXoaTaiKhoan = taoNutHienDai("Xóa Tài Khoản", new Color(244, 67, 54));
+        btnXoaTaiKhoan = ButtonUtils.createRedCoolButton("Xóa Tài Khoản");
         btnXoaTaiKhoan.addActionListener(e -> xoaTaiKhoan());
         panel.add(btnXoaTaiKhoan);
         
-        btnKhoaTaiKhoan = taoNutHienDai("Khóa Tài Khoản", new Color(156, 39, 176));
+        btnKhoaTaiKhoan = ButtonUtils.createPurpleCoolButton("Khóa Tài Khoản");
         btnKhoaTaiKhoan.addActionListener(e -> khoaTaiKhoan());
         panel.add(btnKhoaTaiKhoan);
         
-        btnMoKhoaTaiKhoan = taoNutHienDai("Mở Khóa", new Color(0, 150, 136));
+        btnMoKhoaTaiKhoan = ButtonUtils.createCyanCoolButton("Mở Khóa");
         btnMoKhoaTaiKhoan.addActionListener(e -> moKhoaTaiKhoan());
         panel.add(btnMoKhoaTaiKhoan);
         
@@ -234,19 +302,8 @@ public class QuanLyTaiKhoanPanel extends JPanel {
                     modelTaiKhoan.setRowCount(0);
                     
                     if (danhSachTaiKhoan != null && !danhSachTaiKhoan.isEmpty()) {
-                        System.out.println("=== DEBUG: Lấy dữ liệu tài khoản ===");
-                        System.out.println("Số lượng tài khoản: " + danhSachTaiKhoan.size());
-                        
                         // Thêm dữ liệu thực từ database
                         for (TaiKhoan taiKhoan : danhSachTaiKhoan) {
-                            System.out.println("Tài khoản: " + taiKhoan.getTenDangNhap() + 
-                                " | Họ tên: " + taiKhoan.getHoTen() + 
-                                " | Email: " + taiKhoan.getEmail() + 
-                                " | SĐT: " + taiKhoan.getSoDienThoai() + 
-                                " | Ngày sinh: " + taiKhoan.getNgaySinh() + 
-                                " | Vai trò: " + taiKhoan.getVaiTro() + 
-                                " | Trạng thái: " + taiKhoan.getTrangThai() + 
-                                " | Online: " + taiKhoan.getTrangThaiOnline());
                             
                             Object[] row = {
                                 taiKhoan.getId(),
@@ -264,7 +321,6 @@ public class QuanLyTaiKhoanPanel extends JPanel {
                             };
                             modelTaiKhoan.addRow(row);
                         }
-                        System.out.println("=== KẾT THÚC DEBUG ===");
                         // Không hiển thị thông báo khi tự động làm mới
                     } else {
                         // Chỉ hiển thị thông báo khi không có dữ liệu (không phải tự động làm mới)
@@ -390,9 +446,83 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         gbc.gridx = 0; gbc.gridy = 4;
         panelThongTin.add(new JLabel("Mật khẩu:"), gbc);
         gbc.gridx = 1;
-        JPanel passwordPanel = PasswordFieldUtils.createPasswordFieldWithToggle(20);
-        JPasswordField txtMatKhau = PasswordFieldUtils.getPasswordField(passwordPanel);
-        panelThongTin.add(passwordPanel, gbc);
+        
+        // Tạo custom password field với icon con mắt bên trong
+        JPasswordField txtMatKhau = new JPasswordField(20) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
+        panelThongTin.add(txtMatKhau, gbc);
         
         // Vai trò
         gbc.gridx = 0; gbc.gridy = 5;
@@ -426,7 +556,7 @@ public class QuanLyTaiKhoanPanel extends JPanel {
             }
         };
         panelNut.setOpaque(false);
-        JButton btnThem = taoNutHienDai("Thêm", new Color(76, 175, 80));
+        JButton btnThem = ButtonUtils.createGreenCoolButton("Thêm");
         btnThem.addActionListener(e -> {
             // Xử lý thêm tài khoản
             String tenDN = txtTenDangNhap.getText().trim();
@@ -470,7 +600,7 @@ public class QuanLyTaiKhoanPanel extends JPanel {
             }
         });
         
-        JButton btnHuy = taoNutHienDai("Hủy", new Color(244, 67, 54));
+        JButton btnHuy = ButtonUtils.createRedCoolButton("Hủy");
         btnHuy.addActionListener(e -> dialog.dispose());
         
         panelNut.add(btnThem);
@@ -642,13 +772,87 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         gbc.gridx = 0; gbc.gridy = 5;
         panelThongTin.add(new JLabel("Mật khẩu mới (tùy chọn):"), gbc);
         gbc.gridx = 1;
-        JPanel passwordPanel = PasswordFieldUtils.createPasswordFieldWithToggleNoPlaceholder(25);
-        JPasswordField txtMatKhauMoi = PasswordFieldUtils.getPasswordField(passwordPanel);
+        
+        // Tạo custom password field với icon con mắt bên trong
+        JPasswordField txtMatKhauMoi = new JPasswordField(25) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
         txtMatKhauMoi.setMinimumSize(new Dimension(200, 32));
         txtMatKhauMoi.setPreferredSize(new Dimension(280, 32));
         txtMatKhauMoi.setMaximumSize(new Dimension(350, 32));
         txtMatKhauMoi.setFont(new Font("Arial", Font.PLAIN, 12));
-        panelThongTin.add(passwordPanel, gbc);
+        panelThongTin.add(txtMatKhauMoi, gbc);
         
         // Vai trò
         gbc.gridx = 0; gbc.gridy = 6;
@@ -694,10 +898,6 @@ public class QuanLyTaiKhoanPanel extends JPanel {
                 spinnerThang.setValue(cal.get(java.util.Calendar.MONTH) + 1); // Calendar.MONTH bắt đầu từ 0
                 spinnerNam.setValue(cal.get(java.util.Calendar.YEAR));
                 
-                System.out.println("Đã set ngày sinh: " + ngaySinhStr + " -> " + 
-                    cal.get(java.util.Calendar.DAY_OF_MONTH) + "/" + 
-                    (cal.get(java.util.Calendar.MONTH) + 1) + "/" + 
-                    cal.get(java.util.Calendar.YEAR));
             }
         } catch (Exception e) {
             System.err.println("Lỗi parse ngày sinh: " + e.getMessage());
@@ -737,7 +937,7 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         panelNut.setBorder(new EmptyBorder(10, 10, 10, 10));
         panelNut.setMinimumSize(new Dimension(200, 60));
         panelNut.setPreferredSize(new Dimension(300, 60));
-        JButton btnCapNhat = taoNutHienDai("Cập Nhật", new Color(76, 175, 80));
+        JButton btnCapNhat = ButtonUtils.createGreenCoolButton("Cập Nhật");
         btnCapNhat.setMinimumSize(new Dimension(80, 35));
         btnCapNhat.setPreferredSize(new Dimension(120, 35));
         btnCapNhat.setMaximumSize(new Dimension(150, 35));
@@ -813,7 +1013,7 @@ public class QuanLyTaiKhoanPanel extends JPanel {
             }
         });
         
-        JButton btnHuy = taoNutHienDai("Hủy", new Color(244, 67, 54));
+        JButton btnHuy = ButtonUtils.createRedCoolButton("Hủy");
         btnHuy.setPreferredSize(new Dimension(100, 35));
         btnHuy.setFont(new Font("Arial", Font.BOLD, 12));
         btnHuy.addActionListener(e -> dialog.dispose());
@@ -868,13 +1068,24 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         int taiKhoanId = (Integer) modelTaiKhoan.getValueAt(selectedRow, 0);
         
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Bạn có chắc chắn muốn khóa tài khoản " + tenDangNhap + "?",
+            "Bạn có chắc chắn muốn khóa tài khoản " + tenDangNhap + "?\n" +
+            "Người dùng sẽ bị đăng xuất khỏi hệ thống ngay lập tức.",
             "Xác nhận khóa", JOptionPane.YES_NO_OPTION);
             
         if (confirm == JOptionPane.YES_OPTION) {
             KetNoiDatabase db = KetNoiDatabase.getInstance();
             if (db.capNhatTrangThaiTaiKhoan(taiKhoanId, "bi_khoa")) {
-                JOptionPane.showMessageDialog(this, "Đã khóa tài khoản thành công!", 
+                // Buộc đăng xuất user nếu đang online
+                try {
+                    // Gọi static method để buộc đăng xuất
+                    boolean daDangXuat = server.MayChuTCP.buocDangXuatTaiKhoanStatic(tenDangNhap);
+                    if (daDangXuat) {
+                    }
+                } catch (Exception e) {
+                    System.err.println("Lỗi khi buộc đăng xuất user: " + e.getMessage());
+                }
+                
+                JOptionPane.showMessageDialog(this, "Đã khóa tài khoản và đăng xuất người dùng thành công!", 
                     "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 // Làm mới dữ liệu
                 lamMoiDuLieu();
@@ -914,5 +1125,273 @@ public class QuanLyTaiKhoanPanel extends JPanel {
         }
     }
     
+    /**
+     * Tìm kiếm tài khoản
+     */
+    private void timKiemTaiKhoan() {
+        String tuKhoa = txtTimKiem.getText().trim().toLowerCase();
+        String trangThaiLoc = (String) comboLocTrangThai.getSelectedItem();
+        
+        // Lấy dữ liệu từ database
+        KetNoiDatabase db = KetNoiDatabase.getInstance();
+        List<TaiKhoan> danhSach = db.layDanhSachTaiKhoan();
+        
+        // Xóa dữ liệu cũ
+        modelTaiKhoan.setRowCount(0);
+        
+        // Lọc và hiển thị
+        for (TaiKhoan tk : danhSach) {
+            boolean khopTuKhoa = tuKhoa.isEmpty() || 
+                tk.getTenDangNhap().toLowerCase().contains(tuKhoa) ||
+                tk.getHoTen().toLowerCase().contains(tuKhoa) ||
+                (tk.getEmail() != null && tk.getEmail().toLowerCase().contains(tuKhoa));
+            
+            boolean khopTrangThai = true;
+            if (trangThaiLoc != null) {
+                if (trangThaiLoc.equals("Hoạt động")) {
+                    khopTrangThai = tk.taiKhoanHoatDong();
+                } else if (trangThaiLoc.equals("Bị khóa")) {
+                    khopTrangThai = !tk.taiKhoanHoatDong();
+                }
+            }
+            
+            if (khopTuKhoa && khopTrangThai) {
+                Object[] row = {
+                    tk.getId(),
+                    tk.getTenDangNhap(),
+                    tk.getHoTen(),
+                    tk.getEmail() != null ? tk.getEmail() : "",
+                    tk.getSoDienThoai() != null ? tk.getSoDienThoai() : "",
+                    tk.getNgaySinh() != null ? tk.getNgaySinh() : "",
+                    tk.getVaiTro(),
+                    tk.taiKhoanHoatDong() ? "Hoạt động" : "Bị khóa",
+                    tk.isOnline() ? "Online" : "Offline",
+                    tk.getNgayTao()
+                };
+                modelTaiKhoan.addRow(row);
+            }
+        }
+        
+        // Hiển thị kết quả
+        int soLuong = modelTaiKhoan.getRowCount();
+        if (soLuong == 0) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy tài khoản nào phù hợp!", 
+                "Kết quả tìm kiếm", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+    /**
+     * Làm mới lọc
+     */
+    private void lamMoiLoc() {
+        txtTimKiem.setText("");
+        comboLocTrangThai.setSelectedItem("Tất cả");
+        lamMoiDuLieu();
+    }
+    
+    /**
+     * Tìm kiếm tự động khi nhập hoặc thay đổi lọc
+     */
+    private void timKiemTuDong() {
+        String tuKhoa = txtTimKiem.getText().trim().toLowerCase();
+        String trangThaiLoc = (String) comboLocTrangThai.getSelectedItem();
+        
+        // Lấy dữ liệu từ database
+        KetNoiDatabase db = KetNoiDatabase.getInstance();
+        List<TaiKhoan> danhSach = db.layDanhSachTaiKhoan();
+        
+        // Xóa dữ liệu cũ
+        modelTaiKhoan.setRowCount(0);
+        
+        // Lọc và hiển thị
+        for (TaiKhoan tk : danhSach) {
+            boolean khopTuKhoa = tuKhoa.isEmpty() || 
+                tk.getTenDangNhap().toLowerCase().contains(tuKhoa) ||
+                tk.getHoTen().toLowerCase().contains(tuKhoa) ||
+                (tk.getEmail() != null && tk.getEmail().toLowerCase().contains(tuKhoa));
+            
+            boolean khopTrangThai = true;
+            if (trangThaiLoc != null) {
+                if (trangThaiLoc.equals("Hoạt động")) {
+                    khopTrangThai = tk.taiKhoanHoatDong();
+                } else if (trangThaiLoc.equals("Bị khóa")) {
+                    khopTrangThai = !tk.taiKhoanHoatDong();
+                }
+            }
+            
+            if (khopTuKhoa && khopTrangThai) {
+                Object[] row = {
+                    tk.getId(),
+                    tk.getTenDangNhap(),
+                    tk.getHoTen(),
+                    tk.getEmail() != null ? tk.getEmail() : "",
+                    tk.getSoDienThoai() != null ? tk.getSoDienThoai() : "",
+                    tk.getNgaySinh() != null ? tk.getNgaySinh() : "",
+                    tk.getVaiTro(),
+                    tk.taiKhoanHoatDong() ? "Hoạt động" : "Bị khóa",
+                    tk.isOnline() ? "Online" : "Offline",
+                    tk.getNgayTao()
+                };
+                modelTaiKhoan.addRow(row);
+            }
+        }
+    }
+    
+    /**
+     * Hiển thị lịch sử đăng nhập của tài khoản được chọn
+     */
+    private void hienThiLichSuDangNhap() {
+        int selectedRow = tableTaiKhoan.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn tài khoản để xem lịch sử đăng nhập", 
+                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        
+        // Lấy thông tin tài khoản
+        String tenDangNhap = (String) modelTaiKhoan.getValueAt(selectedRow, 1);
+        String hoTen = (String) modelTaiKhoan.getValueAt(selectedRow, 2);
+        
+        // Tạo dialog hiển thị lịch sử đăng nhập
+        JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), 
+            "Lịch sử đăng nhập - " + hoTen, true);
+        dialog.setSize(1000, 600);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+        
+        // Panel tiêu đề
+        JPanel panelTieuDe = new JPanel(new BorderLayout());
+        panelTieuDe.setBackground(new Color(33, 150, 243));
+        panelTieuDe.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        
+        JLabel lblTieuDe = new JLabel("Lịch sử đăng nhập - " + hoTen + " (" + tenDangNhap + ")");
+        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 16));
+        lblTieuDe.setForeground(Color.WHITE);
+        panelTieuDe.add(lblTieuDe, BorderLayout.CENTER);
+        
+        dialog.add(panelTieuDe, BorderLayout.NORTH);
+        
+        // Panel chính chứa bảng lịch sử
+        JPanel panelChinh = new JPanel(new BorderLayout());
+        panelChinh.setBackground(Color.WHITE);
+        panelChinh.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        // Tạo bảng lịch sử đăng nhập
+        String[] columns = {"STT", "Tên đăng nhập", "Thời gian đăng nhập", "Lần đăng nhập cuối", 
+                           "Địa chỉ IP", "Trạng thái", "Ghi chú"};
+        DefaultTableModel modelLichSu = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        JTable tableLichSu = new JTable(modelLichSu) {
+            @Override
+            public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+                Component c = super.prepareRenderer(renderer, row, column);
+                
+                // Màu xen kẽ
+                if (row % 2 == 0) {
+                    c.setBackground(new Color(248, 250, 252));
+                } else {
+                    c.setBackground(Color.WHITE);
+                }
+                c.setForeground(Color.BLACK);
+                
+                // Màu khi được chọn
+                if (isRowSelected(row)) {
+                    c.setBackground(new Color(25, 118, 210));
+                    c.setForeground(Color.WHITE);
+                }
+                
+                return c;
+            }
+        };
+        
+        tableLichSu.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableLichSu.setRowHeight(25);
+        tableLichSu.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        tableLichSu.getTableHeader().setReorderingAllowed(false);
+        
+        JScrollPane scrollPane = new JScrollPane(tableLichSu);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        panelChinh.add(scrollPane, BorderLayout.CENTER);
+        
+        dialog.add(panelChinh, BorderLayout.CENTER);
+        
+        // Panel nút
+        JPanel panelNut = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelNut.setBackground(Color.WHITE);
+        panelNut.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
+        
+        JButton btnLamMoi = ButtonUtils.createSmallElevatedButton("Làm mới", new Color(76, 175, 80));
+        btnLamMoi.addActionListener(e -> {
+            // Làm mới dữ liệu
+            lamMoiLichSuDangNhap(modelLichSu, tenDangNhap);
+        });
+        
+        JButton btnDong = ButtonUtils.createSmallElevatedButton("Đóng", new Color(244, 67, 54));
+        btnDong.addActionListener(e -> dialog.dispose());
+        
+        panelNut.add(btnLamMoi);
+        panelNut.add(btnDong);
+        dialog.add(panelNut, BorderLayout.SOUTH);
+        
+        // Load dữ liệu lịch sử đăng nhập
+        lamMoiLichSuDangNhap(modelLichSu, tenDangNhap);
+        
+        dialog.setVisible(true);
+    }
+    
+    /**
+     * Làm mới dữ liệu lịch sử đăng nhập
+     */
+    private void lamMoiLichSuDangNhap(DefaultTableModel modelLichSu, String tenDangNhap) {
+        try {
+            // Xóa dữ liệu cũ
+            modelLichSu.setRowCount(0);
+            
+            // Lấy dữ liệu từ database
+            KetNoiDatabase db = KetNoiDatabase.getInstance();
+            
+            List<String[]> lichSu = db.layLichSuDangNhap();
+            
+            int stt = 1;
+            boolean coDuLieu = false;
+            
+            if (lichSu != null && !lichSu.isEmpty()) {
+                for (String[] record : lichSu) {
+                    // Chỉ hiển thị lịch sử của tài khoản được chọn
+                    if (record[1] != null && record[1].equals(tenDangNhap)) {
+                        Object[] row = {
+                            stt,
+                            record[1], // Tên đăng nhập
+                            record[2], // Thời gian đăng nhập
+                            record[3], // Lần đăng nhập cuối
+                            record[4], // Địa chỉ IP
+                            record[5], // Trạng thái
+                            record[6]  // Ghi chú
+                        };
+                        modelLichSu.addRow(row);
+                        stt++;
+                        coDuLieu = true;
+                    }
+                }
+            }
+            
+            if (!coDuLieu) {
+                // Không có dữ liệu
+                Object[] row = {"", "", "Không có dữ liệu lịch sử đăng nhập", "", "", "", ""};
+                modelLichSu.addRow(row);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Lỗi khi lấy lịch sử đăng nhập: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải dữ liệu lịch sử đăng nhập: " + e.getMessage(), 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }
     
 }

@@ -128,22 +128,23 @@ public class GiaoDienServer extends JFrame {
                 g2d.drawRoundRect(0, 0, getWidth() - 2, getHeight() - 2, 15, 15);
             }
         };
-        panel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        panel.setBorder(new EmptyBorder(25, 25, 25, 25));
+        panel.setPreferredSize(new Dimension(800, 120)); // Đảm bảo đủ không gian cho nút
         
         
-        // Nút bật server với thiết kế hiện đại
-        btnBatServer = taoNutHienDai("Bật Server", new Color(46, 125, 50));
+        // Nút bật server với tông màu lạnh
+        btnBatServer = ButtonUtils.createGreenCoolButton("Bật Server");
         btnBatServer.addActionListener(e -> batServer());
         panel.add(btnBatServer);
         
-        // Nút tắt server với thiết kế hiện đại
-        btnTatServer = taoNutHienDai("Tắt Server", new Color(244, 67, 54));
+        // Nút tắt server với tông màu lạnh
+        btnTatServer = ButtonUtils.createRedCoolButton("Tắt Server");
         btnTatServer.setEnabled(false);
         btnTatServer.addActionListener(e -> tatServer());
         panel.add(btnTatServer);
         
-        // Nút xóa log với thiết kế hiện đại
-        JButton btnXoaLog = taoNutHienDai("Xóa Log", new Color(255, 152, 0));
+        // Nút xóa log với tông màu lạnh
+        JButton btnXoaLog = ButtonUtils.createOrangeCoolButton("Xóa Log");
         btnXoaLog.addActionListener(e -> xoaLog());
         panel.add(btnXoaLog);
         
@@ -330,13 +331,7 @@ public class GiaoDienServer extends JFrame {
             }
         };
         
-        button.setPreferredSize(new Dimension(160, 50));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        
-        return button;
+        return ButtonUtils.createElevatedButton(text, mauNen);
     }
     
     

@@ -129,7 +129,6 @@ public class XuLyClient implements Runnable {
         String matKhau = (String) yeuCau.layDuLieu("matKhau");
         
         server.ghiLog("Xử lý đăng nhập cho tài khoản: " + tenDangNhap);
-        System.out.println("DEBUG: Bắt đầu xử lý đăng nhập cho " + tenDangNhap);
         
         ThongDiepTCP phanhoi = new ThongDiepTCP();
         

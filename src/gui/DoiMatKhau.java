@@ -95,33 +95,252 @@ public class DoiMatKhau extends JDialog {
         gbc.gridx = 0; gbc.gridy = 1;
         panelChinh.add(new JLabel("Mật khẩu cũ:"), gbc);
         
-        JPanel passwordPanel1 = PasswordFieldUtils.createPasswordFieldWithToggleNoPlaceholder(20);
-        txtMatKhauCu = PasswordFieldUtils.getPasswordField(passwordPanel1);
+        // Tạo custom password field với icon con mắt bên trong
+        txtMatKhauCu = new JPasswordField(20) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
         gbc.gridx = 1; gbc.gridy = 1;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelChinh.add(passwordPanel1, gbc);
+        panelChinh.add(txtMatKhauCu, gbc);
         
         // Mật khẩu mới
         gbc.gridx = 0; gbc.gridy = 2;
         gbc.fill = GridBagConstraints.NONE;
         panelChinh.add(new JLabel("Mật khẩu mới:"), gbc);
         
-        JPanel passwordPanel2 = PasswordFieldUtils.createPasswordFieldWithToggleNoPlaceholder(20);
-        txtMatKhauMoi = PasswordFieldUtils.getPasswordField(passwordPanel2);
+        // Tạo custom password field thứ 2 với icon con mắt bên trong
+        txtMatKhauMoi = new JPasswordField(20) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
         gbc.gridx = 1; gbc.gridy = 2;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelChinh.add(passwordPanel2, gbc);
+        panelChinh.add(txtMatKhauMoi, gbc);
         
         // Xác nhận mật khẩu mới
         gbc.gridx = 0; gbc.gridy = 3;
         gbc.fill = GridBagConstraints.NONE;
         panelChinh.add(new JLabel("Xác nhận mật khẩu:"), gbc);
         
-        JPanel passwordPanel3 = PasswordFieldUtils.createPasswordFieldWithToggleNoPlaceholder(20);
-        txtXacNhanMatKhau = PasswordFieldUtils.getPasswordField(passwordPanel3);
+        // Tạo custom password field thứ 3 với icon con mắt bên trong
+        txtXacNhanMatKhau = new JPasswordField(20) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
         gbc.gridx = 1; gbc.gridy = 3;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelChinh.add(passwordPanel3, gbc);
+        panelChinh.add(txtXacNhanMatKhau, gbc);
         
         // Hướng dẫn
         JLabel lblHuongDan = new JLabel("<html><i>Mật khẩu phải có ít nhất 6 ký tự</i></html>");
@@ -151,11 +370,11 @@ public class DoiMatKhau extends JDialog {
         panelNut.setOpaque(false);
         panelNut.setBorder(new EmptyBorder(15, 15, 15, 15));
         
-        JButton btnDoiMatKhau = taoNutHienDai("Đổi Mật Khẩu", new Color(255, 192, 203)); // Hồng thường
+        JButton btnDoiMatKhau = ButtonUtils.createCoolButton("Đổi Mật Khẩu");
         btnDoiMatKhau.addActionListener(e -> doiMatKhau());
         panelNut.add(btnDoiMatKhau);
         
-        JButton btnHuy = taoNutHienDai("Hủy", new Color(255, 105, 180)); // Hồng đậm
+        JButton btnHuy = ButtonUtils.createRedCoolButton("Hủy");
         btnHuy.addActionListener(e -> dispose());
         panelNut.add(btnHuy);
         
@@ -173,40 +392,7 @@ public class DoiMatKhau extends JDialog {
     }
     
     private JButton taoNutHienDai(String text, Color mauNen) {
-        JButton button = new JButton() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
-                // Vẽ nền màu hồng đơn giản
-                g2d.setColor(mauNen);
-                g2d.fillRoundRect(0, 0, getWidth(), getHeight(), 15, 15);
-                
-                // Vẽ viền bo tròn đơn giản
-                g2d.setColor(new Color(255, 105, 180)); // Hồng đậm hơn một chút
-                g2d.setStroke(new BasicStroke(2));
-                g2d.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 15, 15);
-                
-                // Vẽ text
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Arial", Font.BOLD, 14));
-                FontMetrics fm = g2d.getFontMetrics();
-                int textWidth = fm.stringWidth(text);
-                int textHeight = fm.getHeight();
-                int x = (getWidth() - textWidth) / 2;
-                int y = (getHeight() + textHeight / 2) / 2;
-                g2d.drawString(text, x, y);
-            }
-        };
-        
-        button.setPreferredSize(new Dimension(160, 50));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        
-        return button;
+        return ButtonUtils.createElevatedButton(text, mauNen);
     }
     
     private void doiMatKhau() {

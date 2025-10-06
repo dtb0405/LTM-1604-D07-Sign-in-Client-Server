@@ -35,33 +35,20 @@ public class PasswordFieldUtils {
         };
         passwordField.setFont(new Font("Arial", Font.PLAIN, 12));
         
-        // Nút toggle ẩn/hiện mật khẩu
-        JButton toggleButton = new JButton("Hiện");
-        toggleButton.setPreferredSize(new Dimension(50, 25));
-        toggleButton.setFont(new Font("Arial", Font.PLAIN, 10));
-        toggleButton.setMargin(new Insets(0, 0, 0, 0));
-        toggleButton.setFocusPainted(false);
-        toggleButton.setBorderPainted(false);
-        toggleButton.setContentAreaFilled(false);
-        toggleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        toggleButton.setForeground(new Color(25, 118, 210));
+        // Nút toggle với icon con mắt
+        EyeIconButton toggleButton = new EyeIconButton();
         
         // Action listener cho nút toggle
         toggleButton.addActionListener(new ActionListener() {
-            private boolean isVisible = false;
-            
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isVisible) {
-                    // Ẩn mật khẩu
-                    passwordField.setEchoChar('•');
-                    toggleButton.setText("Hiện");
-                    isVisible = false;
-                } else {
+                toggleButton.toggle();
+                if (toggleButton.isShowingPassword()) {
                     // Hiện mật khẩu
                     passwordField.setEchoChar((char) 0);
-                    toggleButton.setText("Ẩn");
-                    isVisible = true;
+                } else {
+                    // Ẩn mật khẩu
+                    passwordField.setEchoChar('•');
                 }
                 passwordField.repaint();
             }
@@ -104,33 +91,20 @@ public class PasswordFieldUtils {
         JPasswordField passwordField = new JPasswordField(columns);
         passwordField.setFont(new Font("Arial", Font.PLAIN, 12));
         
-        // Nút toggle ẩn/hiện mật khẩu
-        JButton toggleButton = new JButton("Hiện");
-        toggleButton.setPreferredSize(new Dimension(50, 25));
-        toggleButton.setFont(new Font("Arial", Font.PLAIN, 10));
-        toggleButton.setMargin(new Insets(0, 0, 0, 0));
-        toggleButton.setFocusPainted(false);
-        toggleButton.setBorderPainted(false);
-        toggleButton.setContentAreaFilled(false);
-        toggleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        toggleButton.setForeground(new Color(25, 118, 210));
+        // Nút toggle với icon con mắt
+        EyeIconButton toggleButton = new EyeIconButton();
         
         // Action listener cho nút toggle
         toggleButton.addActionListener(new ActionListener() {
-            private boolean isVisible = false;
-            
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (isVisible) {
-                    // Ẩn mật khẩu
-                    passwordField.setEchoChar('•');
-                    toggleButton.setText("Hiện");
-                    isVisible = false;
-                } else {
+                toggleButton.toggle();
+                if (toggleButton.isShowingPassword()) {
                     // Hiện mật khẩu
                     passwordField.setEchoChar((char) 0);
-                    toggleButton.setText("Ẩn");
-                    isVisible = true;
+                } else {
+                    // Ẩn mật khẩu
+                    passwordField.setEchoChar('•');
                 }
                 passwordField.repaint();
             }

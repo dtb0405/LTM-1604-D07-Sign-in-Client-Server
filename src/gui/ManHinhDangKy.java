@@ -154,22 +154,232 @@ public class ManHinhDangKy extends JDialog {
         gbc.fill = GridBagConstraints.NONE;
         panelChinh.add(new JLabel("Mật khẩu:"), gbc);
         
-        JPanel passwordPanel1 = PasswordFieldUtils.createPasswordFieldWithToggle(20);
-        txtMatKhau = PasswordFieldUtils.getPasswordField(passwordPanel1);
+        // Tạo custom password field với icon con mắt bên trong
+        txtMatKhau = new JPasswordField(20) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (getPassword().length == 0 && !hasFocus()) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(150, 150, 150));
+                    g2d.setFont(getFont().deriveFont(Font.ITALIC));
+                    g2d.drawString("Nhập mật khẩu...", 15, getHeight()/2 + 5);
+                    g2d.dispose();
+                }
+            }
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
+        // Focus listener để ẩn/hiện placeholder
+        txtMatKhau.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (txtMatKhau.getPassword().length == 0) {
+                    txtMatKhau.setEchoChar('•');
+                }
+                txtMatKhau.repaint();
+            }
+            
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (txtMatKhau.getPassword().length == 0) {
+                    txtMatKhau.setEchoChar((char) 0);
+                }
+                txtMatKhau.repaint();
+            }
+        });
+        
         gbc.gridx = 1; gbc.gridy = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelChinh.add(passwordPanel1, gbc);
+        panelChinh.add(txtMatKhau, gbc);
         
         // Xác nhận mật khẩu
         gbc.gridx = 0; gbc.gridy = 5;
         gbc.fill = GridBagConstraints.NONE;
         panelChinh.add(new JLabel("Xác nhận mật khẩu:"), gbc);
         
-        JPanel passwordPanel2 = PasswordFieldUtils.createPasswordFieldWithToggle(20);
-        txtXacNhanMatKhau = PasswordFieldUtils.getPasswordField(passwordPanel2);
+        // Tạo custom password field thứ 2 với icon con mắt bên trong
+        txtXacNhanMatKhau = new JPasswordField(20) {
+            private boolean showPassword = false;
+            private JButton toggleButton;
+            
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (getPassword().length == 0 && !hasFocus()) {
+                    Graphics2D g2d = (Graphics2D) g.create();
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2d.setColor(new Color(150, 150, 150));
+                    g2d.setFont(getFont().deriveFont(Font.ITALIC));
+                    g2d.drawString("Nhập mật khẩu...", 15, getHeight()/2 + 5);
+                    g2d.dispose();
+                }
+            }
+            
+            @Override
+            public void addNotify() {
+                super.addNotify();
+                // Tạo nút toggle với icon con mắt nhỏ hơn
+                toggleButton = new JButton() {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = (Graphics2D) g;
+                        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+                        
+                        int width = getWidth();
+                        int height = getHeight();
+                        int centerX = width / 2;
+                        int centerY = height / 2;
+                        int eyeSize = Math.min(width, height) / 2; // Nhỏ hơn
+                        
+                        // Vẽ nền trong suốt
+                        g2d.setColor(new Color(0, 0, 0, 0));
+                        g2d.fillRect(0, 0, width, height);
+                        
+                        if (showPassword) {
+                            // Mắt mở - vẽ con mắt nhỏ hơn
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(1.5f));
+                            
+                            // Vẽ hình oval cho mắt
+                            g2d.drawOval(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize);
+                            
+                            // Vẽ con ngươi
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.fillOval(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3);
+                            
+                            // Vẽ highlight
+                            g2d.setColor(new Color(255, 255, 255, 180));
+                            g2d.fillOval(centerX - eyeSize/6, centerY - eyeSize/6, eyeSize/3, eyeSize/3);
+                            
+                        } else {
+                            // Mắt nhắm - vẽ đường cong
+                            g2d.setColor(new Color(25, 118, 210));
+                            g2d.setStroke(new BasicStroke(2f));
+                            
+                            // Vẽ đường cong
+                            g2d.drawArc(centerX - eyeSize/2, centerY - eyeSize/2, eyeSize, eyeSize, 0, 180);
+                            
+                            // Vẽ thêm đường cong nhỏ
+                            g2d.setStroke(new BasicStroke(1f));
+                            g2d.drawArc(centerX - eyeSize/3, centerY - eyeSize/3, eyeSize*2/3, eyeSize*2/3, 0, 180);
+                        }
+                    }
+                };
+                toggleButton.setOpaque(false);
+                toggleButton.setBorderPainted(false);
+                toggleButton.setFocusPainted(false);
+                toggleButton.setContentAreaFilled(false);
+                toggleButton.setPreferredSize(new Dimension(30, 25)); // Nhỏ hơn
+                toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                toggleButton.addActionListener(e -> {
+                    showPassword = !showPassword;
+                    toggleButton.setToolTipText(showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+                    setEchoChar(showPassword ? (char) 0 : '•');
+                    repaint();
+                });
+                
+                // Đặt nút ở góc phải bên trong
+                setLayout(new BorderLayout());
+                add(toggleButton, BorderLayout.EAST);
+            }
+        };
+        
+        // Focus listener để ẩn/hiện placeholder
+        txtXacNhanMatKhau.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (txtXacNhanMatKhau.getPassword().length == 0) {
+                    txtXacNhanMatKhau.setEchoChar('•');
+                }
+                txtXacNhanMatKhau.repaint();
+            }
+            
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (txtXacNhanMatKhau.getPassword().length == 0) {
+                    txtXacNhanMatKhau.setEchoChar((char) 0);
+                }
+                txtXacNhanMatKhau.repaint();
+            }
+        });
+        
         gbc.gridx = 1; gbc.gridy = 5;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        panelChinh.add(passwordPanel2, gbc);
+        panelChinh.add(txtXacNhanMatKhau, gbc);
         
         // Ghi chú
         JLabel lblGhiChu = new JLabel("<html><i>Lưu ý: Thông tin email, số điện thoại và ngày sinh<br/>có thể cập nhật sau khi đăng nhập thành công</i></html>");
@@ -195,11 +405,11 @@ public class ManHinhDangKy extends JDialog {
         };
         panelNut.setOpaque(false);
         
-        btnDangKy = taoNutHienDai("Đăng Ký", new Color(46, 125, 50));
+        btnDangKy = ButtonUtils.createGreenCoolButton("Đăng Ký");
         btnDangKy.addActionListener(e -> dangKy());
         panelNut.add(btnDangKy);
         
-        btnHuy = taoNutHienDai("Hủy", new Color(244, 67, 54));
+        btnHuy = ButtonUtils.createRedCoolButton("Hủy");
         btnHuy.addActionListener(e -> dispose());
         panelNut.add(btnHuy);
         
@@ -250,13 +460,7 @@ public class ManHinhDangKy extends JDialog {
             }
         };
         
-        button.setPreferredSize(new Dimension(140, 50));
-        button.setFocusPainted(false);
-        button.setOpaque(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        
-        return button;
+        return ButtonUtils.createElevatedButton(text, mauNen);
     }
     
     private void dangKy() {

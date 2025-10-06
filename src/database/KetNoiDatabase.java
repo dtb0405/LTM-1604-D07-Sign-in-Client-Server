@@ -19,7 +19,6 @@ public class KetNoiDatabase {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             this.connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-            System.out.println("Kết nối database thành công!");
         } catch (Exception e) {
             System.err.println("Lỗi kết nối database: " + e.getMessage());
             e.printStackTrace();
@@ -38,7 +37,6 @@ public class KetNoiDatabase {
         try {
             if (connection == null || connection.isClosed()) {
                 connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
-                System.out.println("Tạo kết nối database mới thành công!");
             }
         } catch (SQLException e) {
             System.err.println("Lỗi tạo kết nối database: " + e.getMessage());
@@ -153,7 +151,6 @@ public class KetNoiDatabase {
         String sql = "UPDATE tai_khoan SET trang_thai_online = 'offline'";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.executeUpdate();
-            System.out.println("Đã đặt tất cả tài khoản về offline");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -186,7 +183,6 @@ public class KetNoiDatabase {
             stmt.setString(3, diaChiIp);
             stmt.setString(4, trangThai);
             stmt.executeUpdate();
-            System.out.println("Database: Đã ghi lịch sử đăng nhập thành công - " + tenDangNhap);
         } catch (SQLException e) {
             System.err.println("Database: Lỗi ghi lịch sử đăng nhập: " + e.getMessage());
             e.printStackTrace();
@@ -220,7 +216,6 @@ public class KetNoiDatabase {
             stmt.setString(2, diaChiIp);
             stmt.setString(3, lyDo);
             stmt.executeUpdate();
-            System.out.println("Database: Đã ghi lịch sử đăng nhập thất bại - " + tenDangNhap + ": " + lyDo);
         } catch (SQLException e) {
             System.err.println("Database: Lỗi ghi lịch sử đăng nhập thất bại: " + e.getMessage());
             e.printStackTrace();
@@ -254,7 +249,6 @@ public class KetNoiDatabase {
             stmt.setString(1, matKhauMoi);
             stmt.setInt(2, taiKhoanId);
             int rowsAffected = stmt.executeUpdate();
-            System.out.println("Database: Đổi mật khẩu admin - Số dòng được cập nhật: " + rowsAffected);
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.err.println("Database: Lỗi đổi mật khẩu admin: " + e.getMessage());
@@ -270,8 +264,6 @@ public class KetNoiDatabase {
         List<TaiKhoan> danhSach = new ArrayList<>();
         String sql = "SELECT * FROM tai_khoan ORDER BY ngay_tao DESC";
         
-        System.out.println("=== DEBUG: Lấy danh sách tài khoản từ database ===");
-        System.out.println("SQL: " + sql);
         
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
@@ -291,24 +283,13 @@ public class KetNoiDatabase {
                 tk.setNgayTao(rs.getTimestamp("ngay_tao"));
                 tk.setLanDangNhapCuoi(rs.getTimestamp("lan_dang_nhap_cuoi"));
                 
-                System.out.println("Tài khoản " + count + ": " + tk.getTenDangNhap() + 
-                    " | Họ tên: " + tk.getHoTen() + 
-                    " | Email: " + tk.getEmail() + 
-                    " | SĐT: " + tk.getSoDienThoai() + 
-                    " | Ngày sinh (raw): " + rs.getDate("ngay_sinh") + 
-                    " | Ngày sinh (object): " + tk.getNgaySinh() + 
-                    " | Vai trò: " + tk.getVaiTro() + 
-                    " | Trạng thái: " + tk.getTrangThai() + 
-                    " | Online: " + tk.getTrangThaiOnline());
                 
                 danhSach.add(tk);
             }
-            System.out.println("Tổng số tài khoản lấy được: " + count);
         } catch (SQLException e) {
             System.err.println("Lỗi khi lấy danh sách tài khoản: " + e.getMessage());
             e.printStackTrace();
         }
-        System.out.println("=== KẾT THÚC DEBUG DATABASE ===");
         return danhSach;
     }
     
@@ -405,6 +386,10 @@ public class KetNoiDatabase {
         }
         return 0;
     }
+    
+    /**
+     * Kiểm tra dữ liệu trong bảng lịch sử đăng nhập
+     */
     
     /**
      * Đóng kết nối
@@ -542,12 +527,6 @@ public class KetNoiDatabase {
             return false;
         }
         
-        System.out.println("Database: Cập nhật tài khoản ID: " + taiKhoanId);
-        System.out.println("Database: Họ tên: " + hoTen);
-        System.out.println("Database: Email: " + email);
-        System.out.println("Database: Số điện thoại: " + soDienThoai);
-        System.out.println("Database: Vai trò: " + vaiTro);
-        System.out.println("Database: Ngày sinh: " + ngaySinh);
         
         String sql = "UPDATE tai_khoan SET ho_ten = ?, email = ?, so_dien_thoai = ?, vai_tro = ?, ngay_sinh = ? WHERE id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -567,7 +546,6 @@ public class KetNoiDatabase {
             stmt.setInt(6, taiKhoanId);
             
             int rowsAffected = stmt.executeUpdate();
-            System.out.println("Database: Số dòng được cập nhật: " + rowsAffected);
             return rowsAffected > 0;
         } catch (SQLException e) {
             System.err.println("Database: Lỗi SQL: " + e.getMessage());
@@ -687,5 +665,106 @@ public class KetNoiDatabase {
         
         // Ghi lịch sử đăng xuất
         ghiLichSuDangNhap(taiKhoanId, "127.0.0.1", "dang_xuat");
+    }
+    
+    /**
+     * Cập nhật ảnh đại diện cho tài khoản
+     */
+    public boolean capNhatAnhDaiDien(int taiKhoanId, String avatarPath) {
+        Connection connection = getConnection();
+        if (connection == null) return false;
+        
+        String sql = "UPDATE tai_khoan SET avatar_path = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, avatarPath);
+            stmt.setInt(2, taiKhoanId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi cập nhật ảnh đại diện: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Lấy đường dẫn ảnh đại diện của tài khoản
+     */
+    public String layAnhDaiDien(int taiKhoanId) {
+        Connection connection = getConnection();
+        if (connection == null) return null;
+        
+        String sql = "SELECT avatar_path FROM tai_khoan WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, taiKhoanId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("avatar_path");
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi lấy ảnh đại diện: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * Xóa ảnh đại diện của tài khoản
+     */
+    public boolean xoaAnhDaiDien(int taiKhoanId) {
+        Connection connection = getConnection();
+        if (connection == null) return false;
+        
+        String sql = "UPDATE tai_khoan SET avatar_path = NULL WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, taiKhoanId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi xóa ảnh đại diện: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Lưu ảnh đại diện dạng BLOB vào database
+     */
+    public boolean luuAnhDaiDienBlob(int taiKhoanId, byte[] imageData) {
+        Connection connection = getConnection();
+        if (connection == null) return false;
+        
+        String sql = "UPDATE tai_khoan SET avatar_data = ? WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setBytes(1, imageData);
+            stmt.setInt(2, taiKhoanId);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi lưu ảnh đại diện BLOB: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Lấy ảnh đại diện dạng BLOB từ database
+     */
+    public byte[] layAnhDaiDienBlob(int taiKhoanId) {
+        Connection connection = getConnection();
+        if (connection == null) return null;
+        
+        String sql = "SELECT avatar_data FROM tai_khoan WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, taiKhoanId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getBytes("avatar_data");
+            }
+        } catch (SQLException e) {
+            System.err.println("Lỗi lấy ảnh đại diện BLOB: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -24,6 +24,7 @@ public class DashboardPanel extends JPanel {
     private JLabel lblLuotDangNhapTrongNgay;
     
     private Timer timerCapNhat;
+    private JButton btnXemBieuDo;
     
     public DashboardPanel(KetNoiTCP ketNoi) {
         this.ketNoi = ketNoi;
@@ -96,7 +97,12 @@ public class DashboardPanel extends JPanel {
         JLabel lblTieuDe = new JLabel("DASHBOARD - TỔNG QUAN HỆ THỐNG", SwingConstants.CENTER);
         lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
         lblTieuDe.setForeground(new Color(33, 150, 243));
-        panelTieuDe.add(lblTieuDe);
+        panelTieuDe.add(lblTieuDe, BorderLayout.CENTER);
+        
+        // Nút xem biểu đồ với tông màu lạnh
+        btnXemBieuDo = ButtonUtils.createOrangeCoolButton("Xem Biểu Đồ");
+        btnXemBieuDo.addActionListener(e -> moBieuDo());
+        panelTieuDe.add(btnXemBieuDo, BorderLayout.EAST);
         
         backgroundPanel.add(panelTieuDe, BorderLayout.NORTH);
         
@@ -110,39 +116,39 @@ public class DashboardPanel extends JPanel {
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
         panel.setOpaque(false);
         
-        // Tổng số tài khoản - Tông lạnh xanh dương
+        // Tổng số tài khoản - Pastel hồng nhạt
         JPanel cardTongTaiKhoan = taoCardThongKe("TỔNG SỐ TÀI KHOẢN", "0", 
-            new Color(30, 136, 229), "");
+            new Color(255, 160, 170), "");
         lblTongTaiKhoan = (JLabel) ((JPanel) cardTongTaiKhoan.getComponent(1)).getComponent(0);
         panel.add(cardTongTaiKhoan);
         
-        // Tài khoản online - Tông lạnh xanh lá
+        // Tài khoản online - Pastel hồng rất nhạt
         JPanel cardOnline = taoCardThongKe("TÀI KHOẢN ONLINE", "0", 
-            new Color(38, 166, 91), "");
+            new Color(255, 190, 190), "");
         lblTaiKhoanOnline = (JLabel) ((JPanel) cardOnline.getComponent(1)).getComponent(0);
         panel.add(cardOnline);
         
-        // Tài khoản offline - Tông lạnh xám xanh
+        // Tài khoản offline - Pastel cam đào
         JPanel cardOffline = taoCardThongKe("TÀI KHOẢN OFFLINE", "0", 
-            new Color(84, 110, 122), "");
+            new Color(255, 220, 190), "");
         lblTaiKhoanOffline = (JLabel) ((JPanel) cardOffline.getComponent(1)).getComponent(0);
         panel.add(cardOffline);
         
-        // Tài khoản bị khóa - Tông lạnh đỏ
+        // Tài khoản bị khóa - Pastel xanh lá nhạt
         JPanel cardBiKhoa = taoCardThongKe("TÀI KHOẢN BỊ KHÓA", "0", 
-            new Color(211, 47, 47), "");
+            new Color(220, 255, 220), "");
         lblTaiKhoanBiKhoa = (JLabel) ((JPanel) cardBiKhoa.getComponent(1)).getComponent(0);
         panel.add(cardBiKhoa);
         
-        // Tài khoản hoạt động - Tông lạnh cam
+        // Tài khoản hoạt động - Pastel xanh mint
         JPanel cardHoatDong = taoCardThongKe("TÀI KHOẢN HOẠT ĐỘNG", "0", 
-            new Color(255, 112, 67), "");
+            new Color(190, 255, 220), "");
         lblTaiKhoanHoatDong = (JLabel) ((JPanel) cardHoatDong.getComponent(1)).getComponent(0);
         panel.add(cardHoatDong);
         
-        // Lượt đăng nhập trong ngày - Tông lạnh tím
+        // Lượt đăng nhập trong ngày - Pastel xanh aqua
         JPanel cardDangNhapTrongNgay = taoCardThongKe("LƯỢT ĐĂNG NHẬP HÔM NAY", "0", 
-            new Color(142, 36, 170), "");
+            new Color(190, 240, 240), "");
         lblLuotDangNhapTrongNgay = (JLabel) ((JPanel) cardDangNhapTrongNgay.getComponent(1)).getComponent(0);
         panel.add(cardDangNhapTrongNgay);
         
@@ -156,19 +162,38 @@ public class DashboardPanel extends JPanel {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
                 
-                // Vẽ shadow
-                g2d.setColor(new Color(0, 0, 0, 30));
-                g2d.fillRoundRect(3, 3, getWidth(), getHeight(), 20, 20);
+                int width = getWidth();
+                int height = getHeight();
+                int arcRadius = 20;
                 
-                // Vẽ background chính với bo góc mềm mại
+                // Vẽ shadow đa lớp cho hiệu ứng đẹp hơn
+                // Shadow 1 - đậm nhất
+                g2d.setColor(new Color(0, 0, 0, 20));
+                g2d.fillRoundRect(4, 4, width - 4, height - 4, arcRadius, arcRadius);
+                
+                // Shadow 2 - trung bình
+                g2d.setColor(new Color(0, 0, 0, 15));
+                g2d.fillRoundRect(3, 3, width - 3, height - 3, arcRadius, arcRadius);
+                
+                // Shadow 3 - nhạt nhất
+                g2d.setColor(new Color(0, 0, 0, 10));
+                g2d.fillRoundRect(2, 2, width - 2, height - 2, arcRadius, arcRadius);
+                
+                // Vẽ background chính với gradient nhẹ
                 g2d.setColor(mauNen);
-                g2d.fillRoundRect(0, 0, getWidth() - 3, getHeight() - 3, 20, 20);
+                g2d.fillRoundRect(0, 0, width - 2, height - 2, arcRadius, arcRadius);
+                
+                // Vẽ highlight trên cùng
+                g2d.setColor(new Color(255, 255, 255, 40));
+                g2d.setStroke(new BasicStroke(1.5f));
+                g2d.drawRoundRect(0, 0, width - 2, height - 2, arcRadius, arcRadius);
                 
                 // Vẽ border tinh tế
-                g2d.setColor(new Color(255, 255, 255, 30));
+                g2d.setColor(new Color(255, 255, 255, 60));
                 g2d.setStroke(new BasicStroke(1));
-                g2d.drawRoundRect(0, 0, getWidth() - 3, getHeight() - 3, 20, 20);
+                g2d.drawRoundRect(1, 1, width - 4, height - 4, arcRadius - 2, arcRadius - 2);
             }
         };
         card.setLayout(new BorderLayout());
@@ -179,9 +204,29 @@ public class DashboardPanel extends JPanel {
         JPanel panelTieuDe = new JPanel(new GridBagLayout());
         panelTieuDe.setOpaque(false);
         
-        JLabel lblTieuDe = new JLabel(tieuDe);
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 14));
-        lblTieuDe.setForeground(Color.WHITE);
+        JLabel lblTieuDe = new JLabel(tieuDe) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Vẽ shadow cho text
+                g2d.setColor(new Color(0, 0, 0, 30));
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                String text = getText();
+                int x = (getWidth() - fm.stringWidth(text)) / 2;
+                int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+                g2d.drawString(text, x + 1, y + 1);
+                
+                // Vẽ text chính
+                g2d.setColor(Color.BLACK);
+                g2d.drawString(text, x, y);
+                
+                g2d.dispose();
+            }
+        };
+        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 16)); // Tăng từ 14 lên 16
         lblTieuDe.setHorizontalAlignment(SwingConstants.CENTER);
         
         GridBagConstraints gbc = new GridBagConstraints();
@@ -195,9 +240,34 @@ public class DashboardPanel extends JPanel {
         JPanel panelGiaTri = new JPanel(new GridBagLayout());
         panelGiaTri.setOpaque(false);
         
-        JLabel lblGiaTri = new JLabel(giaTri);
-        lblGiaTri.setFont(new Font("Arial", Font.BOLD, 36));
-        lblGiaTri.setForeground(Color.WHITE);
+        JLabel lblGiaTri = new JLabel(giaTri) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2d = (Graphics2D) g.create();
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                // Vẽ shadow cho text
+                g2d.setColor(new Color(0, 0, 0, 30));
+                g2d.setFont(getFont());
+                FontMetrics fm = g2d.getFontMetrics();
+                String text = getText();
+                int x = (getWidth() - fm.stringWidth(text)) / 2;
+                int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+                
+                // Vẽ shadow ở 4 hướng
+                g2d.drawString(text, x + 1, y + 1);
+                g2d.drawString(text, x - 1, y - 1);
+                g2d.drawString(text, x + 1, y - 1);
+                g2d.drawString(text, x - 1, y + 1);
+                
+                // Vẽ text đen
+                g2d.setColor(Color.BLACK);
+                g2d.drawString(text, x, y);
+                
+                g2d.dispose();
+            }
+        };
+        lblGiaTri.setFont(new Font("Arial", Font.BOLD, 42)); // Tăng từ 36 lên 42
         lblGiaTri.setHorizontalAlignment(SwingConstants.CENTER);
         
         GridBagConstraints gbc2 = new GridBagConstraints();
@@ -297,5 +367,31 @@ public class DashboardPanel extends JPanel {
         if (timerCapNhat != null) {
             timerCapNhat.cancel();
         }
+    }
+    
+    /**
+     * Mở cửa sổ biểu đồ
+     */
+    private void moBieuDo() {
+        JFrame frameBieuDo = new JFrame("Biểu Đồ Thống Kê");
+        frameBieuDo.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frameBieuDo.setSize(1200, 800);
+        frameBieuDo.setMinimumSize(new Dimension(800, 600));
+        frameBieuDo.setMaximumSize(new Dimension(1600, 1200));
+        frameBieuDo.setLocationRelativeTo(this);
+        frameBieuDo.setResizable(true);
+        
+        BieuDoPanel bieuDoPanel = new BieuDoPanel();
+        frameBieuDo.add(bieuDoPanel);
+        
+        // Thêm listener để dừng timer khi đóng cửa sổ
+        frameBieuDo.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent e) {
+                bieuDoPanel.dungCapNhatRealTime();
+            }
+        });
+        
+        frameBieuDo.setVisible(true);
     }
 }

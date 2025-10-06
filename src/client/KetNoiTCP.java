@@ -33,14 +33,11 @@ public class KetNoiTCP {
             ois = new ObjectInputStream(socket.getInputStream());
             daKetNoi = true;
             
-            System.out.println("Connected to server: " + diaChiServer + ":" + congServer);
             return true;
             
         } catch (ConnectException e) {
-            System.err.println("Cannot connect to server. Please check if server is running.");
             return false;
         } catch (IOException e) {
-            System.err.println("Connection error: " + e.getMessage());
             return false;
         }
     }
@@ -55,10 +52,8 @@ public class KetNoiTCP {
             if (oos != null) oos.close();
             if (socket != null) socket.close();
             
-            System.out.println("Đã ngắt kết nối khỏi server");
             
         } catch (IOException e) {
-            System.err.println("Lỗi khi ngắt kết nối: " + e.getMessage());
         }
     }
     
@@ -67,7 +62,6 @@ public class KetNoiTCP {
      */
     public ThongDiepTCP guiYeuCau(ThongDiepTCP yeuCau) {
         if (!daKetNoi) {
-            System.err.println("Not connected to server");
             return null;
         }
         
@@ -81,7 +75,6 @@ public class KetNoiTCP {
             return phanhoi;
             
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error sending/receiving data: " + e.getMessage());
             return null;
         }
     }
@@ -140,6 +133,7 @@ public class KetNoiTCP {
     public String getThongTinServer() {
         return diaChiServer + ":" + congServer;
     }
+    
     
 }
 

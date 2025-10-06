@@ -122,8 +122,6 @@ public class MayChuTCP {
     public synchronized void ghiLog(String thongDiep) {
         String logMessage = "[" + new Date() + "] " + thongDiep;
         logServer.add(logMessage);
-        System.out.println("SERVER LOG: " + logMessage);
-        System.err.println("SERVER LOG: " + logMessage); // Thêm stderr để đảm bảo hiển thị
         
         // Giới hạn số lượng log (giữ 1000 dòng gần nhất)
         if (logServer.size() > 1000) {
@@ -173,27 +171,31 @@ public class MayChuTCP {
         Socket socket = clientOnline.get(tenDangNhap);
         if (socket != null) {
             try {
-                // Gửi thông báo buộc đăng xuất
-                ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                ThongDiepTCP thongDiep = new ThongDiepTCP();
-                thongDiep.setLoaiYeuCau("BUOC_DANG_XUAT");
-                thongDiep.setMaPhanhoi(ThongDiepTCP.THANH_CONG);
-                oos.writeObject(thongDiep);
-                oos.flush();
+                ghiLog(">>> Bắt đầu buộc đăng xuất tài khoản: " + tenDangNhap);
+                
+                // Đóng socket để buộc client ngắt kết nối
+                socket.close();
                 
                 // Xóa khỏi danh sách online
-                xoaClientOnline(tenDangNhap);
+                clientOnline.remove(tenDangNhap);
+                ghiLog(">>> Đã xóa " + tenDangNhap + " khỏi danh sách online");
                 
                 // Cập nhật database
                 TaiKhoan tk = database.timTaiKhoanTheoTen(tenDangNhap);
                 if (tk != null) {
                     database.capNhatTrangThaiOnline(tk.getId(), false);
+                    ghiLog(">>> Đã cập nhật trạng thái offline cho " + tenDangNhap);
                 }
                 
+                ghiLog(">>> Hoàn thành buộc đăng xuất cho " + tenDangNhap);
                 return true;
             } catch (IOException e) {
                 ghiLog("Lỗi khi buộc đăng xuất " + tenDangNhap + ": " + e.getMessage());
+                // Vẫn xóa khỏi danh sách online nếu có lỗi
+                clientOnline.remove(tenDangNhap);
             }
+        } else {
+            ghiLog("Không tìm thấy tài khoản " + tenDangNhap + " trong danh sách online");
         }
         return false;
     }
@@ -219,18 +221,43 @@ public class MayChuTCP {
         return database;
     }
     
+    // Static instance để có thể gọi từ bất kỳ đâu
+    private static MayChuTCP instance;
+    
+    /**
+     * Lấy instance của server (nếu có)
+     */
+    public static MayChuTCP getInstance() {
+        return instance;
+    }
+    
+    /**
+     * Thiết lập instance của server
+     */
+    public static void setInstance(MayChuTCP server) {
+        instance = server;
+    }
+    
+    /**
+     * Buộc đăng xuất một tài khoản (static method)
+     */
+    public static boolean buocDangXuatTaiKhoanStatic(String tenDangNhap) {
+        if (instance != null) {
+            return instance.buocDangXuatTaiKhoan(tenDangNhap);
+        }
+        return false;
+    }
+    
     public static void main(String[] args) {
         MayChuTCP server = new MayChuTCP();
         
         // Thêm shutdown hook để đóng server khi thoát chương trình
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Đang đóng server...");
             server.dungServer();
         }));
         
         // Khởi động server
         if (server.khoidongServer(CONG_MAC_DINH)) {
-            System.out.println("Server đang chạy. Nhấn Ctrl+C để dừng.");
             try {
                 Thread.currentThread().join();
             } catch (InterruptedException e) {
