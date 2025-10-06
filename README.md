@@ -73,6 +73,12 @@ Trong đó:
       <b>Đổi mật khẩu</b>
     </td>
   </tr>
+  <tr>
+    <td align="center">
+      <img width="400" src="docs/user_avt.png" /><br/>
+      <b>Cập nhật ảnh đại diện</b>
+    </td>
+  </tr>
 </table>
 
 </div>
@@ -88,6 +94,16 @@ Trong đó:
     <td align="center">
       <img width="500" src="docs/server_main.png" /><br/>
       <b>Màn hình chính của Server</b>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img width="500" src="docs/admin_avt.png" /><br/>
+      <b>Admin - Cập nhật ảnh đại diện</b>
+    </td>
+    <td align="center">
+      <img width="500" src="docs/admin_bieu_do.png" /><br/>
+      <b>Biểu đồ thống kê tài khoản</b>
     </td>
   </tr>
   <tr>
